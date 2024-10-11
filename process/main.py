@@ -1,12 +1,9 @@
-import os
 import flet as ft
-import logging as log
-import imutils
-import cv2
-from PIL import Image, ImageTk
-
 from process.gui.image_paths import ImagePaths
-from process.database.config import DataBasePaths
+from process.gui.fonts_paths import FontPaths, register_fonts
+from process.gui.views.login_page import LoginPage
+from process.gui.views.register_page import RegisterPage
+
 #from process.face_processing.face_signup import FacialSignup
 #from process.face_processing.face_login import FacialLogin
 
@@ -19,25 +16,25 @@ class GraphicalUserInterface:
         self.page.window_height = 720
         self.page.vertical_alignment = ft.MainAxisAlignment.CENTER
 
-        # Instanciar ImagePaths para obtener la ruta de la imagen
+        # Instanciar ImagePaths y FontPaths para obtener las rutas
         self.images = ImagePaths()
+        self.fonts = FontPaths()
 
-        # Crear la interfaz
-        self.main()
+        # Registrar las fuentes
+        register_fonts(self.page, self.fonts)
 
-    def main(self):
-        # Usar la imagen de fondo desde ImagePaths
-        background_container = ft.Container(
-            content=ft.Text(""),
-            width=1280,
-            height=720,
-            alignment=ft.alignment.center,
-            image_src=self.images.init_img,  # Imagen de fondo
-            image_fit=ft.ImageFit.COVER
-        )
+        # Instanciar vistas, pasando `self.images` a `LoginView` y `RegisterPage`
+        self.login_view = LoginPage(page, self.images, self.show_register)
+        self.register_view = RegisterPage(page, self.images, self.show_login)
 
-        # Añadir el contenedor con la imagen de fondo a la página
-        self.page.add(background_container)
+        # Mostrar la vista de login inicialmente
+        self.show_login()
+
+    def show_login(self, e=None):
+        self.login_view.show()
+
+    def show_register(self, e=None):
+        self.register_view.show()
 
     # Función para inicializar la app en la página de Flet
     def init_app(self):

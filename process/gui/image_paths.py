@@ -1,11 +1,12 @@
 from pydantic import BaseModel
 
 from process.gui.assets.images.gui_init_image import gui_init_image_path
-
+from process.gui.assets.images.register_button import register_button_path
 
 class ImagePaths(BaseModel):
     # main images
     init_img: str = gui_init_image_path
+    register_img: str = register_button_path
     #login_img: str = login_button_image_path
     #signup_img: str = signup_button_image_path
 

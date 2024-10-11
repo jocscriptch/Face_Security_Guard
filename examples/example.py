@@ -9,13 +9,10 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from process.main import GraphicalUserInterface
 
 
-#app.GraphicalUserInterface()
-#app.frame.mainloop()
-
 def main(page: ft.Page):
     # Inicializar la interfaz gráfica desde el módulo main
     app = GraphicalUserInterface(page)
 
 
 # Ejecutar la aplicación Flet desde este archivo
-ft.app(target=main)
+ft.app(target=main, assets_dir="process/gui/assets")
