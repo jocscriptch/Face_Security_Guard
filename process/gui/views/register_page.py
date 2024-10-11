@@ -11,25 +11,35 @@ class RegisterPage:
         self.button_factory = ButtonFactory()
 
     def show(self):
-        # Aquí podrías usar self.images para cualquier imagen necesaria
-        register_text = ft.Text(
-            "Ventana de Registro Facial",
-            size=30,
-            font_family="PattaRegular"
+        # Imagen de fondo de la pantalla de registro
+        background_image = ft.Container(
+            width=1280,
+            height=720,
+            image_src=self.images.register_img,
+            image_fit=ft.ImageFit.COVER
         )
+
+        # Botón para volver a la pantalla de login
         back_button = self.button_factory.create_gradient_button(
             text="Volver",
             on_click=self.go_back_to_login,
-            font_family="PattaRegular"
+            font_family="PattaRegular",
+            icon="arrow_back",
+            icon_color="white"
         )
 
-        # Mostrar en la página
-        self.page.controls.clear()
-        self.page.add(
-            ft.Column(
-                controls=[register_text, back_button],
-                alignment=ft.MainAxisAlignment.CENTER,
-                horizontal_alignment=ft.CrossAxisAlignment.CENTER
-            )
+        # Contenedor con padding para ajustar la posición del botón
+        back_button_container = ft.Container(
+            content=back_button,
+            padding=ft.padding.only(left=0, top=0)
         )
+
+        # Usar un Stack para colocar la imagen de fondo y el botón
+        content_stack = ft.Stack(
+            controls=[background_image, back_button_container]
+        )
+
+        # Mostrar el Stack en la página
+        self.page.controls.clear()
+        self.page.add(content_stack)
         self.page.update()

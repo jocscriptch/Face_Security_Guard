@@ -11,10 +11,11 @@ from process.gui.views.register_page import RegisterPage
 class GraphicalUserInterface:
     def __init__(self, page: ft.Page):
         self.page = page
-        self.page.title = "Sistema de Seguridad Facial"
+        self.page.title = "Sistema de Seguridad Facial - IA"
         self.page.window_width = 1280
         self.page.window_height = 720
         self.page.vertical_alignment = ft.MainAxisAlignment.CENTER
+        self.page.window_maximizable = False
 
         # Instanciar ImagePaths y FontPaths para obtener las rutas
         self.images = ImagePaths()
@@ -24,17 +25,23 @@ class GraphicalUserInterface:
         register_fonts(self.page, self.fonts)
 
         # Instanciar vistas, pasando `self.images` a `LoginView` y `RegisterPage`
-        self.login_view = LoginPage(page, self.images, self.show_register)
-        self.register_view = RegisterPage(page, self.images, self.show_login)
+        self.login_view = LoginPage(page, self.images, self.show_register, self.show_login)
+        self.register_view = RegisterPage(page, self.images, self.show_init)
 
         # Mostrar la vista de login inicialmente
-        self.show_login()
+        self.show_init()
 
-    def show_login(self, e=None):
+    def show_init(self, e=None):
         self.login_view.show()
 
     def show_register(self, e=None):
         self.register_view.show()
+
+    def show_login(self, e=None):
+        # Lógica para cuando se presione "Iniciar Sesión"
+        print("Iniciar Sesión clicked!")
+        # validar las credenciales loginFacial, etc.
+        # ir al dashboard
 
     # Función para inicializar la app en la página de Flet
     def init_app(self):

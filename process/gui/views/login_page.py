@@ -4,9 +4,10 @@ from process.gui.image_paths import ImagePaths
 
 
 class LoginPage:
-    def __init__(self, page, images: ImagePaths, go_to_register):
+    def __init__(self, page, images: ImagePaths, go_to_register, go_to_login):
         self.page = page
         self.images = images
+        self.go_to_login = go_to_login
         self.go_to_register = go_to_register
         self.button_factory = ButtonFactory()
 
@@ -19,23 +20,34 @@ class LoginPage:
             image_fit=ft.ImageFit.COVER
         )
 
+        # Botón de iniciar sesión
+        login_button = self.button_factory.create_gradient_button(
+            text="Iniciar Sesión",
+            on_click=self.go_to_login,
+            font_family="PattaRegular"
+        )
+
         # Botón de registro
         register_button = self.button_factory.create_gradient_button(
-            text="Registrarse",
+            text="Acceder",
             on_click=self.go_to_register,
             font_family="PattaRegular"
         )
 
-        # Contenedor para posicionar el botón
-        button_container = ft.Container(
+        # Contenedores con padding para ajustar la posición de los botones
+        register_button_container = ft.Container(
             content=register_button,
-            top=600,
-            left=800
+            padding=ft.padding.only(left=880, top=595)  # posicion del botón
         )
 
-        # Stack para colocar fondo y botón
+        login_button_container = ft.Container(
+            content=login_button,
+            padding=ft.padding.only(left=174, top=595)
+        )
+
+        # Stack para superponer el fondo y los botones
         content_stack = ft.Stack(
-            controls=[background_image, button_container]
+            controls=[background_image, register_button_container, login_button_container]
         )
 
         # Mostrar la vista en la página
