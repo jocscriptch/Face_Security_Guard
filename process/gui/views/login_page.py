@@ -24,25 +24,29 @@ class LoginPage:
         login_button = self.button_factory.create_gradient_button(
             text="Iniciar Sesión",
             on_click=self.go_to_login,
-            font_family="PattaRegular"
+            font_family="PattaRegular",
+            width=190,
+            height=50
         )
 
         # Botón de registro
         register_button = self.button_factory.create_gradient_button(
             text="Acceder",
             on_click=self.go_to_register,
-            font_family="PattaRegular"
+            font_family="PattaRegular",
+            width=150,
+            height=45
         )
 
         # Contenedores con padding para ajustar la posición de los botones
-        register_button_container = ft.Container(
-            content=register_button,
-            padding=ft.padding.only(left=880, top=595)  # posicion del botón
-        )
-
         login_button_container = ft.Container(
             content=login_button,
-            padding=ft.padding.only(left=174, top=595)
+            padding=ft.padding.only(left=178, top=590)
+        )
+
+        register_button_container = ft.Container(
+            content=register_button,
+            padding=ft.padding.only(left=906, top=590)  # posicion del botón
         )
 
         # Stack para superponer el fondo y los botones

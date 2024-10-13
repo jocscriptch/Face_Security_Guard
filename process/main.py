@@ -32,6 +32,7 @@ class GraphicalUserInterface:
         self.show_init()
 
     def show_init(self, e=None):
+        self.page.title = "Sistema de Seguridad Facial - IA"
         self.login_view.show()
 
     def show_register(self, e=None):

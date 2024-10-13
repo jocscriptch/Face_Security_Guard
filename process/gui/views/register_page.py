@@ -11,6 +11,7 @@ class RegisterPage:
         self.button_factory = ButtonFactory()
 
     def show(self):
+        self.page.title = "Registro Facial"
         # Imagen de fondo de la pantalla de registro
         background_image = ft.Container(
             width=1280,
@@ -24,6 +25,8 @@ class RegisterPage:
             text="Volver",
             on_click=self.go_back_to_login,
             font_family="PattaRegular",
+            width=150,
+            height=50,
             icon="arrow_back",
             icon_color="white"
         )
