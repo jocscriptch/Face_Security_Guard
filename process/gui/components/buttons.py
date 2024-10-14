@@ -1,18 +1,21 @@
 import flet as ft
 
+
 class ButtonFactory:
-    def create_gradient_button(self, text, on_click, font_family="", icon=None, icon_color=None, height=50, width=None):
-        # Si no se especifica el ancho, lo calculamos basado en la longitud del texto
+    @staticmethod
+    def create_gradient_button(text, on_click, font_family="", icon=None, icon_color=None, height=50, width=None,
+                               color_start=ft.colors.BLUE, color_end=ft.colors.PURPLE):
+        # Si no se especifica el ancho, calcular segun la longitud del texto
         button_width = width if width is not None else max(200, len(text) * 12)
 
         return ft.Container(
-            height=height,  # Ajustamos el alto según el argumento
-            width=button_width,  # Ajustamos el ancho según el argumento o calculado
+            height=height,
+            width=button_width,
             border_radius=ft.border_radius.all(10),
             gradient=ft.LinearGradient(
                 begin=ft.alignment.top_left,
                 end=ft.alignment.bottom_right,
-                colors=[ft.colors.BLUE, ft.colors.PURPLE]
+                colors=[color_start, color_end]
             ),
             content=ft.ElevatedButton(
                 text=text,
@@ -21,7 +24,7 @@ class ButtonFactory:
                 icon_color=icon_color,
                 color=ft.colors.WHITE,
                 width=button_width,
-                height=height,  # Ajustamos el alto del botón
+                height=height,
                 style=ft.ButtonStyle(
                     shape=ft.RoundedRectangleBorder(radius=10),
                     bgcolor={"": ft.colors.TRANSPARENT},
