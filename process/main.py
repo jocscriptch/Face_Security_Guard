@@ -26,7 +26,7 @@ class GraphicalUserInterface:
 
         # Instanciar vistas, pasando `self.images` a `LoginView` y `RegisterPage`
         self.login_view = LoginPage(page, self.images, self.show_register, self.show_login)
-        self.register_view = RegisterPage(page, self.images, self.show_init)
+        self.register_view = RegisterPage(page, self.images, self.show_init, self.on_register)
 
         # Mostrar la vista de login inicialmente
         self.show_init()
@@ -37,6 +37,12 @@ class GraphicalUserInterface:
 
     def show_register(self, e=None):
         self.register_view.show()
+
+    def on_register(self, e=None):
+        # Lógica para cuando se presione "Registrar"
+        print("Registrar clicked!")
+        # registrar las credenciales loginFacial, etc.
+        # ir al login
 
     def show_login(self, e=None):
         # Lógica para cuando se presione "Iniciar Sesión"
