@@ -1,6 +1,7 @@
 import flet as ft
 from process.gui.image_paths import ImagePaths
 from process.gui.fonts_paths import FontPaths, register_fonts
+from process.gui.views.dashboard_page import DashBoardPage
 from process.gui.views.login_page import LoginPage
 from process.gui.views.register_page import RegisterPage
 
@@ -17,6 +18,10 @@ class GraphicalUserInterface:
         self.page.vertical_alignment = ft.MainAxisAlignment.CENTER
         self.page.window_maximizable = False
 
+        # Establecer un color de fondo oscuro para la página
+        self.page.theme_mode = ft.ThemeMode.DARK  # Habilitar tema oscuro
+        self.page.bgcolor = ft.colors.BLACK  # O establecer un color específico
+
         # Instanciar ImagePaths y FontPaths para obtener las rutas
         self.images = ImagePaths()
         self.fonts = FontPaths()
@@ -27,6 +32,7 @@ class GraphicalUserInterface:
         # Instanciar vistas, pasando `self.images` a `LoginView` y `RegisterPage`
         self.login_view = LoginPage(page, self.images, self.show_register, self.show_login)
         self.register_view = RegisterPage(page, self.images, self.show_init, self.on_register)
+        self.dashboard_view = DashBoardPage(page)
 
         # Mostrar la vista de login inicialmente
         self.show_init()
@@ -47,6 +53,7 @@ class GraphicalUserInterface:
     def show_login(self, e=None):
         # Lógica para cuando se presione "Iniciar Sesión"
         print("Iniciar Sesión clicked!")
+        self.dashboard_view.show()
         # validar las credenciales loginFacial, etc.
         # ir al dashboard
 
