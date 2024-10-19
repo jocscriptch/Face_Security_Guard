@@ -1,11 +1,13 @@
 import os
 import cv2
 import flet as ft
+import time
 from process.database.config import DataBasePaths
 from process.gui.image_paths import ImagePaths
 from process.gui.fonts_paths import FontPaths, register_fonts
 from process.gui.views.login_page import LoginPage
 from process.gui.views.register_page import RegisterPage
+from process.face_processing.face_signup import FaceSignUp
 
 
 class GraphicalUserInterface:
@@ -21,6 +23,7 @@ class GraphicalUserInterface:
         self.images = ImagePaths()
         self.fonts = FontPaths()
         self.database = DataBasePaths()
+        self.face_sign_up = FaceSignUp()
 
         self.user_list = []
 
@@ -30,6 +33,10 @@ class GraphicalUserInterface:
         # Instanciar vistas
         self.login_view = LoginPage(page, self.images, self.show_register, self.show_login)
         self.register_view = RegisterPage(page, self.images, self.show_init, self.on_register)
+
+        # variables de video captura
+        self.signup_window = None
+        self.sign_up_video = None
 
         # Mostrar la vista de login inicialmente
         self.show_init()
@@ -68,13 +75,21 @@ class GraphicalUserInterface:
         self.register_view.username_textfield.update()
 
         # Iniciar la captura de video al registrar
-        self.show_video_capture()
+        self.show_video_capture(username)
 
-    def show_video_capture(self):
+    # Debo construir este método para cerrar la video captura automáticamente
+    def close_sign_up(self):
+        cv2.destroyAllWindows()
+        print("Ventana de captura cerrada.")
+
+    def show_video_capture(self, username):
         # Captura de video con OpenCV
         cap = cv2.VideoCapture(1)  # (0: Cámara integrada, 1: IriumWebcam, 2: Etc)
+        #cap = cv2.VideoCapture("http://192.168.0.5:4747/video")
         cap.set(3, 1280)
         cap.set(4, 720)
+
+        start_time = time.time()  # Tomar el tiempo inicial
 
         while True:
             ret, frame = cap.read()  # Leer frame
@@ -82,8 +97,16 @@ class GraphicalUserInterface:
                 print("Error al acceder a la cámara")
                 break
 
+            # Procesar la imagen (registro facial) pasando el nombre del usuario real
+            frame, save_img, info = self.face_sign_up.process(frame, username)
+
             # Mostrar el frame en una ventana
             cv2.imshow('Captura Facial', frame)
+
+            # Cerrar la ventana después de 3 segundos
+            if save_img and time.time() - start_time >= 5:  # Comprobar si han pasado 3 segundos
+                self.close_sign_up()
+                break
 
             # Salir al presionar la tecla "Esc"
             if cv2.waitKey(1) & 0xFF == 27:
