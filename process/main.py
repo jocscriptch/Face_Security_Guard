@@ -5,6 +5,7 @@ import time
 from process.database.config import DataBasePaths
 from process.gui.image_paths import ImagePaths
 from process.gui.fonts_paths import FontPaths, register_fonts
+from process.gui.views.dashboard_page import DashBoardPage
 from process.gui.views.login_page import LoginPage
 from process.gui.views.register_page import RegisterPage
 from process.face_processing.face_signup import FaceSignUp
@@ -19,7 +20,11 @@ class GraphicalUserInterface:
         self.page.vertical_alignment = ft.MainAxisAlignment.CENTER
         self.page.window_maximizable = False
 
-        # Instanciar rutas de imágenes y fuentes
+        # Establecer un color de fondo oscuro para la página
+        self.page.theme_mode = ft.ThemeMode.DARK  # Habilitar tema oscuro
+        self.page.bgcolor = ft.colors.BLACK  # O establecer un color específico
+
+        # Instanciar ImagePaths y FontPaths para obtener las rutas
         self.images = ImagePaths()
         self.fonts = FontPaths()
         self.database = DataBasePaths()
@@ -33,6 +38,7 @@ class GraphicalUserInterface:
         # Instanciar vistas
         self.login_view = LoginPage(page, self.images, self.show_register, self.show_login)
         self.register_view = RegisterPage(page, self.images, self.show_init, self.on_register)
+        self.dashboard_view = DashBoardPage(page)
 
         # variables de video captura
         self.signup_window = None
@@ -118,6 +124,9 @@ class GraphicalUserInterface:
     def show_login(self, e=None):
         # Lógica para cuando se presione "Iniciar Sesión"
         print("Iniciar Sesión clicked!")
+        #self.dashboard_view.show()
+        # validar las credenciales loginFacial, etc.
+        # ir al dashboard
 
     def init_app(self):
         return self.page
