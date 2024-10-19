@@ -13,6 +13,14 @@ class RegisterPage:
         self.button_factory = ButtonFactory()
         self.textfield_factory = TextFieldFactory()
 
+        # Aquí almacenamos una referencia al TextField directamente
+        self.username_textfield = ft.TextField(
+            label="Nombre de usuario",
+            hint_text="Ingresa tu nombre de usuario",
+            width=300,
+            text_style=ft.TextStyle(font_family="PattaSemiBold")
+        )
+
     def show(self):
         self.page.title = "Registro Facial"
 
@@ -24,19 +32,26 @@ class RegisterPage:
             image_fit=ft.ImageFit.COVER
         )
 
-        # texfield
-        username_label_and_field = self.textfield_factory.create_text_with_label(
-            label_text="Nombre de Usuario",
-            field_label="Nombre de usuario",
-            hint_text="Ingresa tu nombre de usuario",
-            label_size=25,
-            text_size=16,
-            width=300,
-            font_family="PattaSemiBold",
-            label_top=240,
-            label_left=518,
-            textfield_top=300,
-            textfield_left=495,
+        # Etiqueta "Nombre de Usuario"
+        username_label = ft.Text(
+            value="Nombre de Usuario",
+            size=25,
+            color=ft.colors.WHITE,
+            font_family="PattaSemiBold"
+        )
+
+        # Contenedor para el label
+        username_label_container = ft.Container(
+            content=username_label,
+            top=240,  # posición Y del label
+            left=518  # posición X del label
+        )
+
+        # Contenedor para el TextField
+        username_field_container = ft.Container(
+            content=self.username_textfield,
+            top=300,  # posición Y del campo de texto
+            left=495  # posición X del campo de texto
         )
 
         # Botón para volver a la pantalla de login
@@ -81,10 +96,10 @@ class RegisterPage:
         content_stack = ft.Stack(
             controls=[
                 background_image,
-                *username_label_and_field,
+                username_label_container,
+                username_field_container,
                 back_button_container,
                 register_button_container
-
             ]
         )
 

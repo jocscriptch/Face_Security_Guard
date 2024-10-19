@@ -15,4 +15,4 @@ def main(page: ft.Page):
 
 
 # Ejecutar la aplicación Flet desde este archivo
-ft.app(target=main, assets_dir="process/gui/assets")
+ft.app(target=main, assets_dir="../process/gui/assets")
