@@ -9,19 +9,25 @@ from typing import List, Tuple, Any
 
 from process.face_processing.face_detect_models.face_detect import FaceDetectMediapipe
 from process.face_processing.face_mesh_models.face_mesh import FaceMeshMediapipe
+from process.face_processing.face_matcher_models.face_matcher import FaceMatcherModels
 
 
 class FaceUtils:
     def __init__(self):
         # face detect
         self.face_detector = FaceDetectMediapipe()
-
         # face mesh
         self.face_mesh_detector = FaceMeshMediapipe()
-
         # face matcher
+        self.face_matcher = FaceMatcherModels()
 
+        # variables
         self.angle = None
+        self.face_db = []
+        self.face_names = []
+        self.distance: float = 0.0
+        self.matching: bool = False
+        self.user_registered = False
 
     # detect
     def check_face(self, face_image: np.ndarray) -> Tuple[bool, Any, np.ndarray]:
@@ -60,77 +66,109 @@ class FaceUtils:
         x1, y1, xf, yf = x1 - offset_x, y1 - (offset_y * 4), xf + offset_x, yf
         return face_image[y1:yf, x1:xf]
 
-    # guardar rostro
-    def save_face(self, face_crop: np.ndarray, username: str, faces_path: str):
+    # guardar rostro (revisar si funcina)
+    def save_face(self, face_crop: np.ndarray, user_code: str, path: str):
         if len(face_crop) != 0:
-            if -5 < self.angle < 5:
-                #faces_crop = cv2.cvtColor(face_crop, cv2.COLOR_BGR2RGB)
-                cv2.imwrite(f"{faces_path}/{username}.png", face_crop)
-                return True
+            cv2.imwrite(f"{path}/{user_code}.png", face_crop)
+            return True
 
         else:
             return False
 
-
-
-    # funciones para alinear el rostro
-    def face_rotate(self, face_image: np.ndarray, angle: float, center: Tuple[int, int]):
-        h, w, _ = face_image.shape
-        matrix = cv2.getRotationMatrix2D(center, angle, 1.0)
-        face_rotated = cv2.warpAffine(face_image, matrix, (w, h))
-        return face_rotated
-
-    # calcular angulo de rotacion
-    def calculate_rotation_angle(self, right_eye_x: int, right_eye_y: int, left_eye_x: int, left_eye_y: int):
-        delta_x = left_eye_x - right_eye_x
-        delta_y = left_eye_y - right_eye_y
-        angle_rad = math.atan2(delta_y, delta_x)
-        angle_deg = math.degrees(angle_rad)
-        angle_deg %= 360
-        return angle_deg
-
-    # alinear rostros
-    def align_faces(self, face_image: np.ndarray, face_key_points: List[List[int]]):
-        h, w, _ = face_image.shape
-
-        # ojos
-        right_eye_x, right_eye_y = face_key_points[0][0], face_key_points[0][1]
-        left_eye_x, left_eye_y = face_key_points[1][0], face_key_points[1][1]
-
-        # angulo
-        self.angle = self.calculate_rotation_angle(right_eye_x, right_eye_y, left_eye_x, left_eye_y)
-        if self.angle > 180:
-            self.angle -= 360
-
-        # centrar el rostro
-        center = ((right_eye_x + left_eye_x) // 2, (right_eye_y + left_eye_y) // 2)
-        aligned_face = self.face_rotate(face_image, self.angle, center)
-        return aligned_face
-
-    # funcion para dibujar y manejar estado de la captura facial
+    # maneja estado del registro facial
     def show_state_sign_up(self, face_image: np.ndarray, state: bool, countdown_time: int):
         if state:
             if countdown_time > 0:
-                text = f"Capturando rostro en {countdown_time}..."
-            else:
-                text = "Capturando rostro!"
+                text = f"Capturando rostro en {countdown_time} segundos..."
 
-            # Mostrar el texto en la ventana
+            else:
+                text = "Capturando Rostro!"
+
+            # Mostrar el texto en la imagen de la ventana
             size_text = cv2.getTextSize(text, cv2.FONT_HERSHEY_DUPLEX, 0.75, 1)
             dim, baseline = size_text[0], size_text[1]
             cv2.rectangle(face_image, (370, 650 - dim[1] - baseline), (370 + dim[0], 650 + baseline), (0, 0, 0),
                           cv2.FILLED)
             cv2.putText(face_image, text, (370, 650 - 5), cv2.FONT_HERSHEY_DUPLEX, 0.75, (0, 255, 0), 1)
 
-            # Cambiar el color de la malla facial a verde
+            # cambiar el color de la malla facial a verde
             self.face_mesh_detector.config_color((0, 255, 0))
+
         else:
             text = "Rostro no encontrado, mira la camara!"
             size_text = cv2.getTextSize(text, cv2.FONT_HERSHEY_DUPLEX, 0.75, 1)
             dim, baseline = size_text[0], size_text[1]
             cv2.rectangle(face_image, (370, 650 - dim[1] - baseline), (370 + dim[0], 650 + baseline), (0, 0, 0),
                           cv2.FILLED)
-            cv2.putText(face_image, text, (370, 650 - 5), cv2.FONT_HERSHEY_DUPLEX, 0.75, (255, 0, 0), 1)
+            cv2.putText(face_image, text, (370, 650 - 5), cv2.FONT_HERSHEY_DUPLEX, 0.75, (0, 0, 255), 1)
 
-            # Cambiar el color de la malla facial a rojo
-            self.face_mesh_detector.config_color((255, 0, 0))
+            # cambiar el color de la malla facial a rojo
+            self.face_mesh_detector.config_color((0, 0, 255))
+
+    # maneja estado del inicio de sesion
+    def show_state_login(self, face_image: np.ndarray, state: bool):
+        if state:
+            text = 'Rostro Aprobado, ingresando...'
+            size_text = cv2.getTextSize(text, cv2.FONT_HERSHEY_DUPLEX, 0.75, 1)
+            dim, baseline = size_text[0], size_text[1]
+            cv2.rectangle(face_image, (370, 650 - dim[1] - baseline), (370 + dim[0], 650 + baseline), (0, 0, 0),
+                          cv2.FILLED)
+            cv2.putText(face_image, text, (370, 650 - 5), cv2.FONT_HERSHEY_DUPLEX, 0.75, (0, 255, 0), 1)
+            self.face_mesh_detector.config_color((0, 255, 0))
+
+        elif state is None:
+            text = 'Verificando Rostro, mira la camara!'
+            size_text = cv2.getTextSize(text, cv2.FONT_HERSHEY_DUPLEX, 0.75, 1)
+            dim, baseline = size_text[0], size_text[1]
+            cv2.rectangle(face_image, (370, 650 - dim[1] - baseline), (370 + dim[0], 650 + baseline), (0, 0, 0),
+                          cv2.FILLED)
+            cv2.putText(face_image, text, (370, 650 - 5), cv2.FONT_HERSHEY_DUPLEX, 0.75, (0, 127, 255), 1)
+            self.face_mesh_detector.config_color((255, 255, 0))
+
+        elif state is False:
+            text = 'Rostro no Aprobado, registrese por favor!'
+            size_text = cv2.getTextSize(text, cv2.FONT_HERSHEY_DUPLEX, 0.75, 1)
+            dim, baseline = size_text[0], size_text[1]
+            cv2.rectangle(face_image, (370, 650 - dim[1] - baseline), (370 + dim[0], 650 + baseline), (0, 0, 0),
+                          cv2.FILLED)
+            cv2.putText(face_image, text, (370, 650 - 5), cv2.FONT_HERSHEY_DUPLEX, 0.75, (0, 0, 255), 1)
+            self.face_mesh_detector.config_color((0, 0, 255))
+
+    # leer base de datos
+    def read_face_database(self, database_path: str) -> Tuple[List[np.ndarray], List[str], str]:
+        self.face_db: List[np.ndarray] = []
+        self.face_names: List[str] = []
+
+        for file in os.listdir(database_path):
+            if file.lower().endswith(('.png', '.jpg', '.jpeg')):
+                img_path = os.path.join(database_path, file)
+                img_read = cv2.imread(img_path)
+                if img_read is not None:
+                    self.face_db.append(img_read)
+                    self.face_names.append(os.path.splitext(file)[0])
+
+        return self.face_db, self.face_names, f'Comparando {len(self.face_db)} rostros!'
+
+    # comparar rostros funciona perfecto
+    def face_matching(self, current_face: np.ndarray, face_db: List[np.ndarray], name_db: List[str]) -> Tuple[
+        bool, str]:
+        user_name: str = ''
+        for idx, face_img in enumerate(face_db):
+            self.matching, self.distance = self.face_matcher.face_matching_arcface_model(current_face, face_img)
+            print(f'Validando rostro con: {name_db[idx]}')
+            print(f'matching: {self.matching} distance: {self.distance}')
+            if self.matching:
+                user_name = name_db[idx]
+                return self.matching, user_name
+        return False, 'Rostro Desconocido!'
+
+    # registrar usuario y guardar fecha y hora
+    def user_check_in(self, user_name: str, user_path: str):
+        if not self.user_registered:
+            now = datetime.datetime.now()
+            date_time = now.strftime("%Y-%m-%d %H:%M:%S")
+            user_file_path = os.path.join(user_path, f"{user_name}.txt")
+            with open(user_file_path, "a") as user_file:
+                user_file.write(f'\nAcesso autorizado: {date_time}\n')
+
+            self.user_registered = True

@@ -5,9 +5,11 @@ import time
 from process.database.config import DataBasePaths
 from process.gui.image_paths import ImagePaths
 from process.gui.fonts_paths import FontPaths, register_fonts
+from process.gui.views.dashboard_page import DashBoardPage
 from process.gui.views.login_page import LoginPage
 from process.gui.views.register_page import RegisterPage
 from process.face_processing.face_signup import FaceSignUp
+from process.face_processing.face_login import FaceLogIn
 
 
 class GraphicalUserInterface:
@@ -19,13 +21,19 @@ class GraphicalUserInterface:
         self.page.vertical_alignment = ft.MainAxisAlignment.CENTER
         self.page.window_maximizable = False
 
-        # Instanciar rutas de imágenes y fuentes
+        # Establecer un color de fondo oscuro para la página
+        self.page.theme_mode = ft.ThemeMode.DARK  # Habilitar tema oscuro
+        self.page.bgcolor = ft.colors.BLACK  # O establecer un color específico
+
+        # Instanciar ImagePaths y FontPaths para obtener las rutas
         self.images = ImagePaths()
         self.fonts = FontPaths()
         self.database = DataBasePaths()
         self.face_sign_up = FaceSignUp()
+        self.face_login = FaceLogIn()
 
         self.user_list = []
+        self.user_access = None
 
         # Registrar las fuentes
         register_fonts(self.page, self.fonts)
@@ -33,6 +41,7 @@ class GraphicalUserInterface:
         # Instanciar vistas
         self.login_view = LoginPage(page, self.images, self.show_register, self.show_login)
         self.register_view = RegisterPage(page, self.images, self.show_init, self.on_register)
+        self.dashboard_view = DashBoardPage(page)
 
         # variables de video captura
         self.signup_window = None
@@ -75,17 +84,18 @@ class GraphicalUserInterface:
         self.register_view.username_textfield.update()
 
         # Iniciar la captura de video al registrar
-        self.show_video_capture(username)
+        self.show_register_capture(username)
 
     # Debo construir este método para cerrar la video captura automáticamente
-    def close_sign_up(self):
+    def close_window_video_capture(self):
         cv2.destroyAllWindows()
         print("Ventana de captura cerrada.")
 
-    def show_video_capture(self, username):
+    # captura de video en el registro
+    def show_register_capture(self, username):
         # Captura de video con OpenCV
         cap = cv2.VideoCapture(1)  # (0: Cámara integrada, 1: IriumWebcam, 2: Etc)
-        #cap = cv2.VideoCapture("http://192.168.0.5:4747/video")
+        # cap = cv2.VideoCapture("http://192.168.0.5:4747/video")
         cap.set(3, 1280)
         cap.set(4, 720)
 
@@ -104,8 +114,47 @@ class GraphicalUserInterface:
             cv2.imshow('Captura Facial', frame)
 
             # Cerrar la ventana después de 3 segundos
-            if save_img and time.time() - start_time >= 5:  # Comprobar si han pasado 3 segundos
-                self.close_sign_up()
+            if save_img and time.time() - start_time >= 3:  # Comprobar si han pasado 5 segundos
+                self.close_window_video_capture()
+                break
+
+            # Salir al presionar la tecla "Esc"
+            if cv2.waitKey(1) & 0xFF == 27:
+                break
+
+        cap.release()
+        cv2.destroyAllWindows()
+
+    # captura de video en el login
+    def show_login_capture(self):
+        # Captura de video con OpenCV
+        cap = cv2.VideoCapture(1)  # (Comprobar las cams disponibles)
+        # cap = cv2.VideoCapture("http://192.168.0.5:4747/video") En caso de IP Webcam
+        cap.set(3, 1280)
+        cap.set(4, 720)
+
+        start_time = time.time()
+
+        while True:
+            ret, frame = cap.read()
+            if not ret:
+                print("Error al acceder a la cámara")
+                break
+
+            # procesar la imagen (iniciar sesión facial)
+            frame, self.user_access, info = self.face_login.process(frame)
+
+            # Mostrar el frame en una ventana
+            cv2.imshow('Inicio Sesion Facial', frame)
+
+            # Si el usuario tiene acceso, mostrar el dashboard
+            if self.user_access:
+                print("¡Inicio de sesión exitoso, ir al dashboard!")
+                self.dashboard_view.show()
+
+            # Cerrar la ventana después de 5 segundos
+            if self.user_access and time.time() - start_time >= 5:
+                self.close_window_video_capture()
                 break
 
             # Salir al presionar la tecla "Esc"
@@ -116,8 +165,8 @@ class GraphicalUserInterface:
         cv2.destroyAllWindows()
 
     def show_login(self, e=None):
-        # Lógica para cuando se presione "Iniciar Sesión"
         print("Iniciar Sesión clicked!")
+        self.show_login_capture()
 
     def init_app(self):
         return self.page
