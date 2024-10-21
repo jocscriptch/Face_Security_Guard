@@ -21,11 +21,11 @@ class GraphicalUserInterface:
         self.page.vertical_alignment = ft.MainAxisAlignment.CENTER
         self.page.window_maximizable = False
 
-        # Establecer un color de fondo oscuro para la página
-        self.page.theme_mode = ft.ThemeMode.DARK  # Habilitar tema oscuro
-        self.page.bgcolor = ft.colors.BLACK  # O establecer un color específico
+        # fondo oscuro
+        self.page.theme_mode = ft.ThemeMode.DARK
+        self.page.bgcolor = ft.colors.BLACK
 
-        # Instanciar ImagePaths y FontPaths para obtener las rutas
+        # Instanciar ImagePaths y FontPaths
         self.images = ImagePaths()
         self.fonts = FontPaths()
         self.database = DataBasePaths()
@@ -58,13 +58,11 @@ class GraphicalUserInterface:
         self.register_view.show()
 
     def on_register(self, e=None):
-        # Capturar el texto del campo de usuario
         username = self.register_view.username_textfield.value.strip()
 
-        # Validar que el campo de usuario no esté vacío
         if len(username) == 0:
             print("¡Información incompleta! Por favor, ingrese un nombre de usuario.")
-            return  # No continuar si el campo está vacío
+            return
 
         # Ruta del archivo del usuario
         user_file_path = os.path.join(self.database.users, f"{username}.txt")
@@ -72,21 +70,20 @@ class GraphicalUserInterface:
         # Verificar si el usuario ya está registrado
         if os.path.exists(user_file_path):
             print(f"¡Usuario '{username}' ya registrado!")
-            return  # No continuar si el usuario ya existe
+            return
 
         # Guardar usuario en txt por el momento (base de datos)
         with open(user_file_path, "w") as file:
             file.write(f"Usuario: {username}")
         print(f"¡Usuario {username} registrado exitosamente!")
 
-        # Limpiar el campo de texto después de registrar
+        # Limpiar el campo de texto
         self.register_view.username_textfield.value = ""
         self.register_view.username_textfield.update()
 
         # Iniciar la captura de video al registrar
         self.show_register_capture(username)
 
-    # cerrar la video captura
     def close_window_video_capture(self):
         cv2.destroyAllWindows()
         print("Ventana de captura cerrada.")
@@ -94,31 +91,30 @@ class GraphicalUserInterface:
     # captura de video en el registro
     def show_register_capture(self, username):
         # Captura de video con OpenCV
-        cap = cv2.VideoCapture(1)  # (0: Cámara integrada, 1: IriumWebcam, 2: Etc)
+        cap = cv2.VideoCapture(1)
         # cap = cv2.VideoCapture("http://192.168.0.5:4747/video")
         cap.set(3, 1280)
         cap.set(4, 720)
-
-        start_time = time.time()  # Tomar el tiempo inicial
+        start_time = time.time()
 
         while True:
-            ret, frame = cap.read()  # Leer frame
+            ret, frame = cap.read()
             if not ret:
                 print("Error al acceder a la cámara")
                 break
 
-            # Procesar la imagen (registro facial) pasando el nombre del usuario real
+            # Procesar la imagen (registro facial)
             frame, save_img, info = self.face_sign_up.process(frame, username)
 
             # Mostrar el frame en una ventana
             cv2.imshow('Captura Facial', frame)
 
             # Cerrar la ventana después de 3 segundos
-            if save_img and time.time() - start_time >= 3:  # Comprobar si han pasado 5 segundos
+            if save_img and time.time() - start_time >= 3:
                 self.close_window_video_capture()
                 break
 
-            # Salir al presionar la tecla "Esc"
+            # Salir al presionar la tecla "Esc" (Opcional)
             if cv2.waitKey(1) & 0xFF == 27:
                 break
 
@@ -127,11 +123,8 @@ class GraphicalUserInterface:
 
     # captura de video en el login
     def show_login_capture(self):
-
         self.face_login.reset_cont_frame()
-        # Captura de video con OpenCV
-        cap = cv2.VideoCapture(1)  # (Comprobar las cams disponibles)
-        # cap = cv2.VideoCapture("http://192.168.0.5:4747/video") En caso de IP Webcam
+        cap = cv2.VideoCapture(1)
         cap.set(3, 1280)
         cap.set(4, 720)
 
@@ -145,8 +138,6 @@ class GraphicalUserInterface:
 
             # procesar la imagen (iniciar sesión facial)
             frame, self.user_access, info = self.face_login.process(frame)
-
-            # Mostrar el frame en una ventana
             cv2.imshow('Inicio Sesion Facial', frame)
 
             # Si el usuario tiene acceso, mostrar el dashboard
@@ -154,12 +145,10 @@ class GraphicalUserInterface:
                 print("¡Inicio de sesión exitoso, ir al dashboard!")
                 self.dashboard_view.show()
 
-            # Cerrar la ventana después de 5 segundos
             if self.user_access and time.time() - start_time >= 5:
                 self.close_window_video_capture()
                 break
 
-            # Salir al presionar la tecla "Esc"
             if cv2.waitKey(1) & 0xFF == 27:
                 break
 
