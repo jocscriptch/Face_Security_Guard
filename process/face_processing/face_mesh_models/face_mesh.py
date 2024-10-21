@@ -7,7 +7,6 @@ from typing import Any, List, Tuple
 class FaceMeshMediapipe:
     def __init__(self):
         # mediapipe
-        # funcion para dibujar
         self.mp_draw = mp.solutions.drawing_utils
         # configuracion para dibujar (definir color, grosor, radio)
         self.config_draw = self.mp_draw.DrawingSpec(color=(255, 0, 0), thickness=1, circle_radius=1)
