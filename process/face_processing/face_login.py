@@ -1,7 +1,4 @@
-import cv2
 import numpy as np
-import time
-from typing import Tuple
 from process.face_processing.face_utils import FaceUtils
 from process.database.config import DataBasePaths
 
@@ -13,6 +10,9 @@ class FaceLogIn:
 
         self.matcher = None
         self.comparison = False
+        self.cont_frame = 0
+
+    def reset_cont_frame(self):
         self.cont_frame = 0
 
     def process(self, face_image: np.ndarray):
@@ -33,13 +33,20 @@ class FaceLogIn:
         # 4- check face center (verificar si el rostro está centrado)
         check_face_center = self.face_utils.check_face_center(face_mesh_points_list)
 
+        # 8- read database (leer base de datos)
+        faces_database, names_database, info = self.face_utils.read_face_database(self.database.faces)
+
+        # Sino hay rostros guardados
+        if len(faces_database) == 0:
+            self.face_utils.show_state_login(face_image, False)
+            return face_image, self.matcher, ""
+
         # 5- show state login (mostrar estado de inicio de sesión)
         self.face_utils.show_state_login(face_image, state=self.matcher)
 
         if check_face_center:
             # 6- extract face info (extraer información del rostro)
-            # bbox & key_points
-            self.cont_frame = self.cont_frame + 1
+            self.cont_frame += 1
             print(self.cont_frame)
             if self.cont_frame == 48:
                 face_bbox = self.face_utils.extract_face_bbox(face_image, face_info)
@@ -48,23 +55,18 @@ class FaceLogIn:
                 # 7- face crop (recortar rostro)
                 face_crop = self.face_utils.face_crop(face_save, face_bbox)
 
-                # 8- read database (leer base de datos)
-                faces_database, names_database, info = self.face_utils.read_face_database(self.database.faces)
-
-                if len(faces_database) != 0 and not self.comparison and self.matcher is None:
+                if not self.comparison and self.matcher is None:
                     self.comparison = True
                     # 9- compare faces (comparar rostros)
-                    self.matcher, user_name = self.face_utils.face_matching(face_crop, faces_database,
-                                                                            names_database)
+                    self.matcher, user_name = self.face_utils.face_matching(face_crop, faces_database, names_database)
 
                     if self.matcher:
                         # 10- save data & time (guardar datos y hora)
                         self.face_utils.user_check_in(user_name, self.database.users)
                         return face_image, self.matcher, "Acceso de Usuario Aprobado"
                     else:
-                        return face_image, self.matcher, "Usuario no Autorizado"
-                else:
-                    return face_image, self.matcher, "Base de Datos Vacía"
+                        self.face_utils.show_state_login(face_image, False)
+                        return face_image, self.matcher, ""
             else:
                 return face_image, self.matcher, "No se detectó ningún rostro!"
         else:

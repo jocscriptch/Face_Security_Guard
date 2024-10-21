@@ -3,7 +3,6 @@ como por ejemplo, recordar el rostro de una persona, dibujar sobre el rostro, et
 import os
 import numpy as np
 import cv2
-import math
 import datetime
 from typing import List, Tuple, Any
 
@@ -109,30 +108,20 @@ class FaceUtils:
     def show_state_login(self, face_image: np.ndarray, state: bool):
         if state:
             text = 'Rostro Aprobado, ingresando...'
-            size_text = cv2.getTextSize(text, cv2.FONT_HERSHEY_DUPLEX, 0.75, 1)
-            dim, baseline = size_text[0], size_text[1]
-            cv2.rectangle(face_image, (370, 650 - dim[1] - baseline), (370 + dim[0], 650 + baseline), (0, 0, 0),
-                          cv2.FILLED)
-            cv2.putText(face_image, text, (370, 650 - 5), cv2.FONT_HERSHEY_DUPLEX, 0.75, (0, 255, 0), 1)
-            self.face_mesh_detector.config_color((0, 255, 0))
-
+            color = (0, 255, 0)  # Verde
         elif state is None:
             text = 'Verificando Rostro, mira la camara!'
-            size_text = cv2.getTextSize(text, cv2.FONT_HERSHEY_DUPLEX, 0.75, 1)
-            dim, baseline = size_text[0], size_text[1]
-            cv2.rectangle(face_image, (370, 650 - dim[1] - baseline), (370 + dim[0], 650 + baseline), (0, 0, 0),
-                          cv2.FILLED)
-            cv2.putText(face_image, text, (370, 650 - 5), cv2.FONT_HERSHEY_DUPLEX, 0.75, (0, 127, 255), 1)
-            self.face_mesh_detector.config_color((255, 255, 0))
-
+            color = (255, 255, 0)  # Cyan
         elif state is False:
-            text = 'Rostro no Aprobado, registrese por favor!'
-            size_text = cv2.getTextSize(text, cv2.FONT_HERSHEY_DUPLEX, 0.75, 1)
-            dim, baseline = size_text[0], size_text[1]
-            cv2.rectangle(face_image, (370, 650 - dim[1] - baseline), (370 + dim[0], 650 + baseline), (0, 0, 0),
-                          cv2.FILLED)
-            cv2.putText(face_image, text, (370, 650 - 5), cv2.FONT_HERSHEY_DUPLEX, 0.75, (0, 0, 255), 1)
-            self.face_mesh_detector.config_color((0, 0, 255))
+            # Si no hay rostros registrados,
+            text = 'Lo sentimos, debes registrarse!'
+            color = (0, 0, 255)  # Rojo
+
+        size_text = cv2.getTextSize(text, cv2.FONT_HERSHEY_DUPLEX, 0.75, 1)
+        dim, baseline = size_text[0], size_text[1]
+        cv2.rectangle(face_image, (370, 650 - dim[1] - baseline), (370 + dim[0], 650 + baseline), (0, 0, 0), cv2.FILLED)
+        cv2.putText(face_image, text, (370, 650 - 5), cv2.FONT_HERSHEY_DUPLEX, 0.75, color, 1)
+        self.face_mesh_detector.config_color(color)
 
     # leer base de datos
     def read_face_database(self, database_path: str) -> Tuple[List[np.ndarray], List[str], str]:
