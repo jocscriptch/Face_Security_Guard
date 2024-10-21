@@ -8,7 +8,8 @@ class FaceDetectMediapipe:
     def __init__(self):
         # mediapipe
         self.object_face_mp = mp.solutions.face_detection
-        self.face_detector_mp = self.object_face_mp.FaceDetection(min_detection_confidence=0.7, model_selection=1)
+        # model_selection = 0 o 1 (0 corto alcance, 1 largo alcance)
+        self.face_detector_mp = self.object_face_mp.FaceDetection(min_detection_confidence=0.7, model_selection=0)
         self.bbox = []
         self.face_points = []
 
@@ -27,7 +28,8 @@ class FaceDetectMediapipe:
         for face in face_info.detections:
             bbox = face.location_data.relative_bounding_box
             x1, y1, w_face, h_face = bbox.xmin, bbox.ymin, bbox.width, bbox.height
-            x1, y1, w_face, h_face = int(x1 * width_img), int(y1 * height_img), int(w_face * width_img), int(h_face * height_img)
+            x1, y1, w_face, h_face = int(x1 * width_img), int(y1 * height_img), int(w_face * width_img), int(
+                h_face * height_img)
             xf, yf = x1 + w_face, y1 + h_face
 
             x1 = max(0, x1)
@@ -45,5 +47,4 @@ class FaceDetectMediapipe:
             for i, points in enumerate(key_points):
                 x, y = int(points.x * width_img), int(points.y * height_img)
                 self.face_points.append([x, y])
-
         return self.face_points
