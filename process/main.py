@@ -86,7 +86,7 @@ class GraphicalUserInterface:
         # Iniciar la captura de video al registrar
         self.show_register_capture(username)
 
-    # Debo construir este método para cerrar la video captura automáticamente
+    # cerrar la video captura
     def close_window_video_capture(self):
         cv2.destroyAllWindows()
         print("Ventana de captura cerrada.")
@@ -127,6 +127,8 @@ class GraphicalUserInterface:
 
     # captura de video en el login
     def show_login_capture(self):
+
+        self.face_login.reset_cont_frame()
         # Captura de video con OpenCV
         cap = cv2.VideoCapture(1)  # (Comprobar las cams disponibles)
         # cap = cv2.VideoCapture("http://192.168.0.5:4747/video") En caso de IP Webcam
