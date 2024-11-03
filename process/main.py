@@ -29,9 +29,8 @@ class GraphicalUserInterface:
         self.images = ImagePaths()
         self.fonts = FontPaths()
         self.database = DataBasePaths()
-        self.face_sign_up = FaceSignUp()
+        self.face_sign_up = FaceSignUp(self.images)
         self.face_login = FaceLogIn()
-
         self.user_list = []
         self.user_access = None
 
@@ -109,8 +108,8 @@ class GraphicalUserInterface:
             # Mostrar el frame en una ventana
             cv2.imshow('Captura Facial', frame)
 
-            # Cerrar la ventana después de 3 segundos
-            if save_img and time.time() - start_time >= 3:
+            # Cerrar la ventana luego de 3 segundos desde que se guardó la imagen
+            if self.face_sign_up.success_start_time and time.time() - self.face_sign_up.success_start_time >= 3:
                 self.close_window_video_capture()
                 break
 
@@ -145,7 +144,7 @@ class GraphicalUserInterface:
                 print("¡Inicio de sesión exitoso, ir al dashboard!")
                 self.dashboard_view.show()
 
-            if self.user_access and time.time() - start_time >= 5:
+            if self.user_access and time.time() - start_time >= 3:
                 self.close_window_video_capture()
                 break
 

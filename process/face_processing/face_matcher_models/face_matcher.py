@@ -49,7 +49,7 @@ class FaceMatcherModels:
     # funcion de reconocimiento facial modelo Facenet
     def face_matching_facenet_model(self, face1: np.ndarray, face2: np.ndarray) -> Tuple[bool, float]:
         try:
-            result = DeepFace.verify(img1_path=face1, img2_path=face2, model_name=self.models[1])
+            result = DeepFace.verify(img1_path=face1, img2_path=face2, model_name=self.models[1], anti_spoofing=True)
             matching, distance = result["verified"], result["distance"]
             return matching, distance
         except:
@@ -58,7 +58,7 @@ class FaceMatcherModels:
     # funcion de reconocimiento facial modelo Facenet512
     def face_matching_facenet512_model(self, face1: np.ndarray, face2: np.ndarray) -> Tuple[bool, float]:
         try:
-            result = DeepFace.verify(img1_path=face1, img2_path=face2, model_name=self.models[2])
+            result = DeepFace.verify(img1_path=face1, img2_path=face2, model_name=self.models[2], anti_spoofing=True)
             matching, distance = result["verified"], result["distance"]
             return matching, distance
         except:
@@ -67,7 +67,7 @@ class FaceMatcherModels:
     # funcion de reconocimiento facial modelo OpenFace
     def face_matching_openface_model(self, face1: np.ndarray, face2: np.ndarray) -> Tuple[bool, float]:
         try:
-            result = DeepFace.verify(img1_path=face1, img2_path=face2, model_name=self.models[3])
+            result = DeepFace.verify(img1_path=face1, img2_path=face2, model_name=self.models[3], anti_spoofing=True)
             matching, distance = result["verified"], result["distance"]
             return matching, distance
         except:
@@ -76,7 +76,7 @@ class FaceMatcherModels:
     # funcion de reconocimiento facial modelo DeepFace
     def face_matching_deepface_model(self, face1: np.ndarray, face2: np.ndarray) -> Tuple[bool, float]:
         try:
-            result = DeepFace.verify(img1_path=face1, img2_path=face2, model_name=self.models[4])
+            result = DeepFace.verify(img1_path=face1, img2_path=face2, model_name=self.models[4], anti_spoofing=True)
             matching, distance = result["verified"], result["distance"]
             return matching, distance
         except:
@@ -85,7 +85,7 @@ class FaceMatcherModels:
     # funcion de reconocimiento facial modelo DeepID
     def face_matching_deepid_model(self, face1: np.ndarray, face2: np.ndarray) -> Tuple[bool, float]:
         try:
-            result = DeepFace.verify(img1_path=face1, img2_path=face2, model_name=self.models[5])
+            result = DeepFace.verify(img1_path=face1, img2_path=face2, model_name=self.models[5], anti_spoofing=True)
             matching, distance = result["verified"], result["distance"]
             return matching, distance
         except:
@@ -94,7 +94,7 @@ class FaceMatcherModels:
     # funcion de reconocimiento facial modelo ArcFace
     def face_matching_arcface_model(self, face1: np.ndarray, face2: np.ndarray) -> Tuple[bool, float]:
         try:
-            result = DeepFace.verify(img1_path=face1, img2_path=face2, model_name=self.models[6])
+            result = DeepFace.verify(img1_path=face1, img2_path=face2, model_name=self.models[6], anti_spoofing=True)
             matching, distance = result["verified"], result["distance"]
             return matching, distance
         except:
@@ -103,7 +103,7 @@ class FaceMatcherModels:
     # funcion de reconocimiento facial modelo Dlib
     def face_matching_dlib_model(self, face1: np.ndarray, face2: np.ndarray) -> Tuple[bool, float]:
         try:
-            result = DeepFace.verify(img1_path=face1, img2_path=face2, model_name=self.models[7])
+            result = DeepFace.verify(img1_path=face1, img2_path=face2, model_name=self.models[7], anti_spoofing=True)
             matching, distance = result["verified"], result["distance"]
             return matching, distance
         except:
@@ -112,7 +112,7 @@ class FaceMatcherModels:
     # funcion de reconocimiento facial modelo SFace
     def face_matching_sface_model(self, face1: np.ndarray, face2: np.ndarray) -> Tuple[bool, float]:
         try:
-            result = DeepFace.verify(img1_path=face1, img2_path=face2, model_name=self.models[8])
+            result = DeepFace.verify(img1_path=face1, img2_path=face2, model_name=self.models[8], anti_spoofing=True)
             matching, distance = result["verified"], result["distance"]
             return matching, distance
         except:
@@ -121,10 +121,8 @@ class FaceMatcherModels:
     # funcion de reconocimiento facial modelo GhostFaceNet
     def face_matching_ghostfacenet_model(self, face1: np.ndarray, face2: np.ndarray) -> Tuple[bool, float]:
         try:
-            result = DeepFace.verify(img1_path=face1, img2_path=face2, model_name=self.models[9])
+            result = DeepFace.verify(img1_path=face1, img2_path=face2, model_name=self.models[9], anti_spoofing=True)
             matching, distance = result["verified"], result["distance"]
             return matching, distance
         except:
             return False, 0.0
-
-

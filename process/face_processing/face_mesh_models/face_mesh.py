@@ -9,7 +9,7 @@ class FaceMeshMediapipe:
         # mediapipe
         self.mp_draw = mp.solutions.drawing_utils
         # configuracion para dibujar (definir color, grosor, radio)
-        self.config_draw = self.mp_draw.DrawingSpec(color=(255, 0, 0), thickness=1, circle_radius=1)
+        self.config_draw = self.mp_draw.DrawingSpec(color=(255, 255, 255), thickness=1, circle_radius=1)
 
         # objeto de la malla facial
         self.face_mesh_object = mp.solutions.face_mesh
