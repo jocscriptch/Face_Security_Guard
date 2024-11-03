@@ -28,7 +28,79 @@ class FaceUtils:
         self.matching: bool = False
         self.user_registered = False
 
+        self.blink_counter = 0
+        self.blink_detected = False
+        self.EAR_THRESHOLD = 0.21
+
+        # Número de frames consecutivos que el EAR está por debajo del umbral
+        self.EAR_CONSEC_FRAMES = 3
+        self.frame_counter = 0
+
     # detect
+    def compute_ear(self, eye_points):
+        # Calcular distancias entre puntos verticales y horizontales del ojo
+        A = np.linalg.norm(eye_points[1] - eye_points[5])
+        B = np.linalg.norm(eye_points[2] - eye_points[4])
+        C = np.linalg.norm(eye_points[0] - eye_points[3])
+        EAR = (A + B) / (2.0 * C)
+        return EAR
+
+    def detect_blink(self, face_points: List[List[int]]) -> bool:
+        if len(face_points) != 468:
+            return False
+
+        # Índices de los puntos del ojo izquierdo y derecho
+        left_eye_indices = [33, 160, 158, 133, 153, 144]
+        right_eye_indices = [362, 385, 387, 263, 373, 380]
+
+        # Obtener los puntos de los ojos
+        left_eye = np.array([face_points[i][1:] for i in left_eye_indices])
+        right_eye = np.array([face_points[i][1:] for i in right_eye_indices])
+
+        # Calcular el EAR para cada ojo
+        left_EAR = self.compute_ear(left_eye)
+        right_EAR = self.compute_ear(right_eye)
+
+        EAR = (left_EAR + right_EAR) / 2.0
+
+        # Umbral para considerar que el ojo está cerrado
+        EYE_CLOSED_THRESHOLD = 0.21  # Ajusta este valor según tus pruebas
+
+        # Detección de parpadeo
+        if EAR < EYE_CLOSED_THRESHOLD:
+            if not self.blink_detected and self.blink_counter < 3:
+                self.blink_counter += 1
+                self.blink_detected = True
+        else:
+            self.blink_detected = False
+
+        return self.blink_detected
+
+    def overlay_image(self, background, overlay, x, y):
+        # Superpone una imagen sobre el fondo en la posición (x, y)
+        h, w = overlay.shape[:2]
+        if y + h > background.shape[0] or x + w > background.shape[1]:
+            return background
+
+        if overlay.shape[2] == 4:
+            # Overlay con canal alfa
+            alpha_overlay = overlay[:, :, 3] / 255.0
+            alpha_background = 1.0 - alpha_overlay
+            for c in range(0, 3):
+                background[y:y + h, x:x + w, c] = (alpha_overlay * overlay[:, :, c] +
+                                                   alpha_background * background[y:y + h, x:x + w, c])
+        else:
+            # Overlay sin canal alfa
+            background[y:y + h, x:x + w] = overlay
+
+        return background
+
+    def draw_face_rectangle(self, face_image: np.ndarray, face_bbox: List[int],
+                            color: Tuple[int, int, int] = (0, 165, 255)):
+        # Color naranja en BGR
+        x1, y1, xf, yf = face_bbox
+        cv2.rectangle(face_image, (x1, y1), (xf, yf), color, 2)
+
     def check_face(self, face_image: np.ndarray) -> Tuple[bool, Any, np.ndarray]:
         face_save = face_image.copy()
         check_face, face_info = self.face_detector.face_detect_mediapipe(face_image)
@@ -143,7 +215,7 @@ class FaceUtils:
         bool, str]:
         user_name: str = ''
         for idx, face_img in enumerate(face_db):
-            self.matching, self.distance = self.face_matcher.face_matching_arcface_model(current_face, face_img)
+            self.matching, self.distance = self.face_matcher.face_matching_facenet512_model(current_face, face_img)
             print(f'Validando rostro con: {name_db[idx]}')
             print(f'matching: {self.matching} distance: {self.distance}')
             if self.matching:
