@@ -2,6 +2,7 @@ import os
 import cv2
 import flet as ft
 import time
+
 from process.database.config import DataBasePaths
 from process.gui.image_paths import ImagePaths
 from process.gui.fonts_paths import FontPaths, register_fonts
@@ -10,6 +11,7 @@ from process.gui.views.login_page import LoginPage
 from process.gui.views.register_page import RegisterPage
 from process.face_processing.face_signup import FaceSignUp
 from process.face_processing.face_login import FaceLogIn
+from process.gui.components.alertdialogs import AlertDialogFactory
 
 
 class GraphicalUserInterface:
@@ -42,6 +44,9 @@ class GraphicalUserInterface:
         self.register_view = RegisterPage(page, self.images, self.show_init, self.on_register)
         self.dashboard_view = DashBoardPage(page)
 
+        # **Instanciar AlertDialogFactory**
+        self.alert_factory = AlertDialogFactory(self.page)
+
         # variables de video captura
         self.signup_window = None
         self.sign_up_video = None
@@ -60,7 +65,8 @@ class GraphicalUserInterface:
         username = self.register_view.username_textfield.value.strip()
 
         if len(username) == 0:
-            print("¡Información incompleta! Por favor, ingrese un nombre de usuario.")
+            self.alert_factory.show_warning_dialog("¡Información incompleta! Por favor, ingrese un nombre de usuario.")
+            # print("¡Información incompleta! Por favor, ingrese un nombre de usuario.")
             return
 
         # Ruta del archivo del usuario
@@ -68,13 +74,15 @@ class GraphicalUserInterface:
 
         # Verificar si el usuario ya está registrado
         if os.path.exists(user_file_path):
-            print(f"¡Usuario '{username}' ya registrado!")
+            self.alert_factory.show_warning_dialog("¡Usuario ya registrado!")
+            # print(f"¡Usuario '{username}' ya registrado!")
             return
 
         # Guardar usuario en txt por el momento (base de datos)
         with open(user_file_path, "w") as file:
             file.write(f"Usuario: {username}")
-        print(f"¡Usuario {username} registrado exitosamente!")
+        self.alert_factory.show_success_dialog(f"Usuario {username} registrado exitosamente!")
+        # print(f"¡Usuario {username} registrado exitosamente!")
 
         # Limpiar el campo de texto
         self.register_view.username_textfield.value = ""
@@ -99,7 +107,8 @@ class GraphicalUserInterface:
         while True:
             ret, frame = cap.read()
             if not ret:
-                print("Error al acceder a la cámara")
+                self.alert_factory.show_error_dialog("Error al acceder a la cámara")
+                # print("Error al acceder a la cámara")
                 break
 
             # Procesar la imagen (registro facial)
@@ -111,6 +120,8 @@ class GraphicalUserInterface:
             # Cerrar la ventana luego de 3 segundos desde que se guardó la imagen
             if self.face_sign_up.success_start_time and time.time() - self.face_sign_up.success_start_time >= 3:
                 self.close_window_video_capture()
+                # ir al inicio
+                self.show_init()
                 break
 
             # Salir al presionar la tecla "Esc" (Opcional)
@@ -132,7 +143,8 @@ class GraphicalUserInterface:
         while True:
             ret, frame = cap.read()
             if not ret:
-                print("Error al acceder a la cámara")
+                self.alert_factory.show_error_dialog("Error al acceder a la cámara")
+                # print("Error al acceder a la cámara")
                 break
 
             # procesar la imagen (iniciar sesión facial)
@@ -141,7 +153,8 @@ class GraphicalUserInterface:
 
             # Si el usuario tiene acceso, mostrar el dashboard
             if self.user_access:
-                print("¡Inicio de sesión exitoso, ir al dashboard!")
+                self.alert_factory.show_success_dialog(f"¡Inicio de sesión exitoso!")
+                # print("¡Inicio de sesión exitoso, ir al dashboard!")
                 self.dashboard_view.show()
 
             if self.user_access and time.time() - start_time >= 2:
@@ -155,7 +168,6 @@ class GraphicalUserInterface:
         cv2.destroyAllWindows()
 
     def show_login(self, e=None):
-        print("Iniciar Sesión clicked!")
         self.show_login_capture()
 
     def init_app(self):

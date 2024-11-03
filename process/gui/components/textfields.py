@@ -1,5 +1,6 @@
 import flet as ft
 
+
 class TextFieldFactory:
     def create_text_with_label(self, label_text="", field_label="", hint_text="", font_family="", label_size=18,
                                text_size=16, width=300, height=None, password=False, filled=True,

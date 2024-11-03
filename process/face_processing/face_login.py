@@ -102,8 +102,9 @@ class FaceLogIn:
                 # Recortar el rostro
                 face_crop = self.face_utils.face_crop(face_save, face_bbox)
 
-                # Comparar rostros sin anti-spoofing
-                self.matcher, self.user_name = self.face_utils.face_matching(face_crop, faces_database, names_database)
+                # Comparar rostros anti-spoofing
+                # aca probar con face_matching tambien de face_utils
+                self.matcher, self.user_name = self.face_utils.face_matching_with_antispoofing(face_crop, faces_database, names_database)
 
                 if self.matcher:
                     self.login_success_start_time = time.time()

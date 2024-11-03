@@ -112,7 +112,7 @@ class FaceSignUp:
                     # Mostrar cuenta regresiva
                     countdown = int(delay - time_since_blinks) + 1
                     cv2.putText(face_image, f"Capturando rostro en {countdown} segundos...", (400, 650),
-                                cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+                                cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 3)
             else:
                 # Reiniciar el temporizador si no hay tres parpadeos consecutivos
                 self.save_image_start_time = None
