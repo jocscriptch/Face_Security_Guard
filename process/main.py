@@ -30,7 +30,7 @@ class GraphicalUserInterface:
         self.fonts = FontPaths()
         self.database = DataBasePaths()
         self.face_sign_up = FaceSignUp(self.images)
-        self.face_login = FaceLogIn()
+        self.face_login = FaceLogIn(self.images)
         self.user_list = []
         self.user_access = None
 
@@ -144,7 +144,7 @@ class GraphicalUserInterface:
                 print("¡Inicio de sesión exitoso, ir al dashboard!")
                 self.dashboard_view.show()
 
-            if self.user_access and time.time() - start_time >= 3:
+            if self.user_access and time.time() - start_time >= 2:
                 self.close_window_video_capture()
                 break
 

@@ -6,6 +6,8 @@ import cv2
 import datetime
 from typing import List, Tuple, Any
 
+from deepface import DeepFace
+
 from process.face_processing.face_detect_models.face_detect import FaceDetectMediapipe
 from process.face_processing.face_mesh_models.face_mesh import FaceMeshMediapipe
 from process.face_processing.face_matcher_models.face_matcher import FaceMatcherModels
@@ -135,6 +137,17 @@ class FaceUtils:
         offset_x, offset_y = int(w * 0.025), int(h * 0.025)
         x1, y1, xf, yf = face_bbox
         x1, y1, xf, yf = x1 - offset_x, y1 - (offset_y * 4), xf + offset_x, yf
+
+        # Asegurar que las coordenadas estén dentro de los límites
+        x1 = max(0, x1)
+        y1 = max(0, y1)
+        xf = min(w, xf)
+        yf = min(h, yf)
+
+        if x1 >= xf or y1 >= yf:
+            print("Error: Coordenadas de recorte inválidas")
+            return None
+
         return face_image[y1:yf, x1:xf]
 
     # guardar rostro (revisar si funcina)
@@ -207,7 +220,8 @@ class FaceUtils:
                 if img_read is not None:
                     self.face_db.append(img_read)
                     self.face_names.append(os.path.splitext(file)[0])
-
+                else:
+                    print(f"Error al cargar la imagen: {img_path}")
         return self.face_db, self.face_names, f'Comparando {len(self.face_db)} rostros!'
 
     # comparar rostros funciona perfecto
@@ -221,6 +235,39 @@ class FaceUtils:
             if self.matching:
                 user_name = name_db[idx]
                 return self.matching, user_name
+        return False, 'Rostro Desconocido!'
+
+    # comparar rostros con anti-spoofing
+    def face_matching_with_antispoofing(self, current_face: np.ndarray, face_db: List[np.ndarray],
+                                        name_db: List[str]) -> Tuple[bool, str]:
+        user_name: str = ''
+        for idx, face_img in enumerate(face_db):
+            try:
+                # Verificar que las imágenes no estén vacías
+                if current_face is None or face_img is None:
+                    print(f"Imagen no válida para comparación con {name_db[idx]}")
+                    continue
+
+                # Comprobar dimensiones
+                if current_face.shape[0] == 0 or current_face.shape[1] == 0:
+                    print("current_face tiene dimensiones inválidas")
+                    continue
+                if face_img.shape[0] == 0 or face_img.shape[1] == 0:
+                    print(f"face_img tiene dimensiones inválidas para {name_db[idx]}")
+                    continue
+
+                # Utilizar tu método de comparación de rostros sin anti-spoofing
+                matching, distance = self.face_matcher.face_matching_facenet512_model(current_face, face_img)
+                print(f'Validando rostro con: {name_db[idx]}')
+                print(f'matching: {matching}, distance: {distance}')
+                if matching:
+                    user_name = name_db[idx]
+                    return True, user_name
+            except Exception as e:
+                import traceback
+                traceback.print_exc()
+                print(f"Error en la comparación con {name_db[idx]}: {e}")
+                continue
         return False, 'Rostro Desconocido!'
 
     # registrar usuario y guardar fecha y hora
