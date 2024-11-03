@@ -19,6 +19,7 @@ class FaceSignUp:
         self.save_image_flag = False
         self.no_blink_start_time = time.time()
         self.liveness_error_displayed = False
+        self.save_image_start_time = None
 
         # Cargar imgs para superponer
         self.img_liveness_verification = cv2.imread(self.images.liveness_verification_img, cv2.IMREAD_UNCHANGED)
@@ -47,7 +48,7 @@ class FaceSignUp:
         # 4- Verificar si el rostro está centrado
         check_face_center = self.face_utils.check_face_center(face_mesh_points_list)
 
-        # Superponer imgs
+        # Superponer imágenes
         if not self.save_image_flag:
             if self.img_liveness_verification is not None:
                 face_image = self.face_utils.overlay_image(face_image, self.img_liveness_verification, 0, 0)
@@ -56,7 +57,7 @@ class FaceSignUp:
             if self.img_blinkings is not None:
                 face_image = self.face_utils.overlay_image(face_image, self.img_blinkings, 880, 250)
         else:
-            # Mostrar imagen sucess
+            # Mostrar imagen de éxito
             if self.img_success is not None:
                 face_image = self.face_utils.overlay_image(face_image, self.img_success, 0, 0)
 
@@ -70,7 +71,7 @@ class FaceSignUp:
                 cv2.putText(face_image, f'Parpadeos: {int(self.face_utils.blink_counter)}', (1030, 350),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
 
-            # detectar parpadeos
+            # Detectar parpadeos
             blink_detected = self.face_utils.detect_blink(face_mesh_points_list)
 
             if blink_detected:
@@ -94,15 +95,31 @@ class FaceSignUp:
 
             # Si se detectaron 3 parpadeos y no se ha guardado la imagen
             if self.face_utils.blink_counter >= 3 and not self.save_image_flag:
-                # Guardar el rostro
-                face_crop = self.face_utils.face_crop(face_save, face_bbox)
-                check_save_image = self.face_utils.save_face(face_crop, user_code, self.database.faces)
-                if check_save_image:
-                    self.save_image_flag = True
-                    self.success_start_time = time.time()
+                if self.save_image_start_time is None:
+                    self.save_image_start_time = time.time()
+                delay = 2  # Tiempo de espera en segundos
+                time_since_blinks = time.time() - self.save_image_start_time
+                if time_since_blinks >= delay:
+                    # Guardar el rostro
+                    face_crop = self.face_utils.face_crop(face_save, face_bbox)
+                    check_save_image = self.face_utils.save_face(face_crop, user_code, self.database.faces)
+                    if check_save_image:
+                        self.save_image_flag = True
+                        self.success_start_time = time.time()
+                    else:
+                        print("Error al guardar la imagen del rostro.")
+                else:
+                    # Mostrar cuenta regresiva
+                    countdown = int(delay - time_since_blinks) + 1
+                    cv2.putText(face_image, f"Capturando rostro en {countdown} segundos...", (400, 650),
+                                cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+            else:
+                # Reiniciar el temporizador si no hay tres parpadeos consecutivos
+                self.save_image_start_time = None
         else:
-            # Si el rostro no está centrado, reiniciar el contador
+            # Si el rostro no está centrado, reiniciar el contador y el temporizador
             self.face_utils.blink_counter = 0
+            self.save_image_start_time = None
             cv2.putText(face_image, "Mira de frente a la camara!", (400, 600),
                         cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
 
