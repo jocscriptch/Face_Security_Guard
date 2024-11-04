@@ -11,7 +11,7 @@ Sistema de Seguridad Facial (Face Security Guard) es un proyecto desarrollado en
 
 - **Login Facial:** Autentica a los usuarios a través del reconocimiento facial, asegurando que la persona que intenta iniciar sesión es quien dice ser.
 
-- **Detección de Vivacidad:** Implementación mecanismos de liveness detection para prevenir intentos de suplantación de identidad mediante fotografías o bots.
+- **Detección de Vivacidad:** Implementación de mecanismos de liveness detection para prevenir intentos de suplantación de identidad mediante fotografías o bots.
 
 - **Interfaz Intuitiva:** Interfaz de usuario desarrollada con [Flet](https://flet.dev/) que facilita la interacción y navegación entre las diferentes funcionalidades del sistema.
 
