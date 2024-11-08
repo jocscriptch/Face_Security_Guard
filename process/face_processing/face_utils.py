@@ -1,16 +1,13 @@
 """ Aca hay herramientas para la facilitar la deteccion de rostros,
 como por ejemplo, recordar el rostro de una persona, dibujar sobre el rostro, etc."""
-import os
 import numpy as np
 import cv2
-import datetime
+
 from typing import List, Tuple, Any
-
-from deepface import DeepFace
-
 from process.face_processing.face_detect_models.face_detect import FaceDetectMediapipe
 from process.face_processing.face_mesh_models.face_mesh import FaceMeshMediapipe
 from process.face_processing.face_matcher_models.face_matcher import FaceMatcherModels
+from mongodb.db_functions import insert_user, add_access_log, get_user, get_image_by_id, db
 
 
 class FaceUtils:
@@ -151,13 +148,13 @@ class FaceUtils:
         return face_image[y1:yf, x1:xf]
 
     # guardar rostro (revisar si funcina)
-    def save_face(self, face_crop: np.ndarray, user_code: str, path: str):
+    """def save_face(self, face_crop: np.ndarray, user_code: str, path: str):
         if len(face_crop) != 0:
             cv2.imwrite(f"{path}/{user_code}.png", face_crop)
             return True
 
         else:
-            return False
+            return False"""
 
     # maneja estado del registro facial
     def show_state_sign_up(self, face_image: np.ndarray, state: bool, countdown_time: int):
@@ -209,6 +206,7 @@ class FaceUtils:
         self.face_mesh_detector.config_color(color)
 
     # leer base de datos
+    """
     def read_face_database(self, database_path: str) -> Tuple[List[np.ndarray], List[str], str]:
         self.face_db: List[np.ndarray] = []
         self.face_names: List[str] = []
@@ -222,6 +220,27 @@ class FaceUtils:
                     self.face_names.append(os.path.splitext(file)[0])
                 else:
                     print(f"Error al cargar la imagen: {img_path}")
+        return self.face_db, self.face_names, f'Comparando {len(self.face_db)} rostros!'
+    """
+
+    # Leer la base de datos de MongoDB y cargar las imágenes de los usuarios
+    def read_face_database(self):
+        """Carga las imágenes de MongoDB para la comparación de rostros"""
+        self.face_db.clear()
+        self.face_names.clear()
+
+        # Recuperar la información de todos los usuarios registrados
+        users = db.users.find()
+
+        for user in users:
+            image_id = user['image_id']
+            username = user['username']
+            face_image = get_image_by_id(image_id)
+
+            if face_image is not None:
+                self.face_db.append(face_image)
+                self.face_names.append(username)
+
         return self.face_db, self.face_names, f'Comparando {len(self.face_db)} rostros!'
 
     # comparar rostros funciona perfecto
@@ -271,7 +290,7 @@ class FaceUtils:
         return False, 'Rostro Desconocido!'
 
     # registrar usuario y guardar fecha y hora
-    def user_check_in(self, user_name: str, user_path: str):
+    """def user_check_in(self, user_name: str, user_path: str):
         if not self.user_registered:
             now = datetime.datetime.now()
             date_time = now.strftime("%Y-%m-%d %H:%M:%S")
@@ -279,4 +298,11 @@ class FaceUtils:
             with open(user_file_path, "a") as user_file:
                 user_file.write(f'\nAcesso autorizado: {date_time}\n')
 
+            self.user_registered = True"""
+
+    # registrar usuario y guardar fecha y hora en MongoDB
+    def user_check_in(self, user_name: str):
+        if not self.user_registered:
+            # Añadir el registro de acceso en MongoDB
+            add_access_log(user_name)
             self.user_registered = True
