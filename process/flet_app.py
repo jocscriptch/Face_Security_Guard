@@ -84,7 +84,7 @@ class GraphicalUserInterface:
     # captura de video en el registro
     def show_register_capture(self, username):
         # Captura de video con OpenCV
-        cap = cv2.VideoCapture(1)
+        cap = cv2.VideoCapture(0)
         cap.set(3, 1280)
         cap.set(4, 720)
         start_time = time.time()
@@ -122,7 +122,7 @@ class GraphicalUserInterface:
     # captura de video en el login
     def show_login_capture(self):
         self.face_login.reset_cont_frame()
-        cap = cv2.VideoCapture(1)
+        cap = cv2.VideoCapture(0)
         cap.set(3, 1280)
         cap.set(4, 720)
 
