@@ -4,13 +4,13 @@ import time
 from typing import Tuple
 
 from process.face_processing.face_utils import FaceUtils
-from process.database.config import DataBasePaths
+# from process.database.config import DataBasePaths
 from process.gui.image_paths import ImagePaths
 
 
 class FaceLogIn:
     def __init__(self, images: ImagePaths):
-        self.database = DataBasePaths()
+        # self.database = DataBasePaths()
         self.face_utils = FaceUtils()
         self.images = images
 
@@ -91,29 +91,35 @@ class FaceLogIn:
 
             # Si se detectaron 3 parpadeos y no se ha realizado la comparación
             if self.face_utils.blink_counter >= 3 and not self.comparison:
-                # Leer base de datos
-                faces_database, names_database, info = self.face_utils.read_face_database(self.database.faces)
+                # Leer base de datos de rostros
+                faces_database, names_database, info = self.face_utils.read_face_database()
 
                 # Si no hay rostros guardados
                 if len(faces_database) == 0:
                     self.face_utils.show_state_login(face_image, False)
                     return face_image, False, "No hay rostros registrados!"
 
-                # Recortar el rostro
+                # Recortar el rostro capturado de la imagen actual
                 face_crop = self.face_utils.face_crop(face_save, face_bbox)
 
-                # Comparar rostros anti-spoofing
-                # aca probar con face_matching tambien de face_utils
-                self.matcher, self.user_name = self.face_utils.face_matching_with_antispoofing(face_crop, faces_database, names_database)
+                if face_crop is None:
+                    self.face_utils.show_state_login(face_image, False)
+                    return face_image, False, "No se pudo capturar el rostro."
 
+                # Comparar rostros usando el método de comparación definido en FaceUtils
+                self.matcher, self.user_name = self.face_utils.face_matching_with_antispoofing(face_crop,
+                                                                                               faces_database,
+                                                                                               names_database)
                 if self.matcher:
                     self.login_success_start_time = time.time()
-                    # Guardar fecha y hora de acceso
-                    self.face_utils.user_check_in(self.user_name, self.database.users)
+                    # Guardar registro de acceso
+                    self.face_utils.user_check_in(self.user_name)
+                    self.face_utils.show_state_login(face_image, True)
                 else:
-                    # No hubo coincidencia
+                    # Si no hay coincidencia
                     if self.img_error is not None:
                         face_image = self.face_utils.overlay_image(face_image, self.img_error, 0, 0)
+                    self.face_utils.show_state_login(face_image, False)
                     return face_image, False, "Acceso denegado"
         else:
             # Si el rostro no está centrado, reiniciar el contador
@@ -121,7 +127,7 @@ class FaceLogIn:
             cv2.putText(face_image, "Mira de frente a la camara!", (400, 600),
                         cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
 
-            # Verificar si han pasado 3 segundos desde que se logró el acceso
+        # Verificar si han pasado 3 segundos desde que se logró el acceso
         if self.login_success_start_time and (time.time() - self.login_success_start_time >= 2):
             return face_image, True, "Acceso concedido"
 
