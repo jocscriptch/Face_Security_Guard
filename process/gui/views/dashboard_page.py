@@ -1,205 +1,109 @@
 import flet as ft
-from process.gui.components.buttons import ButtonFactory
 
 class DashBoardPage:
-    def __init__(self, page):
+    def __init__(self, page: ft.Page):
         self.page = page
-        self.button_factory = ButtonFactory()
 
     def show(self):
-        # Fondo blanco para la página
-        self.page.bgcolor = ft.colors.WHITE
+        self.page.clean()  # Limpia cualquier contenido anterior de la página
+        self.page.title = "Flet Admin Dashboard"
+        self.page.theme_mode = "dark"
+        self.page.padding = 0
+        self.page.bgcolor = ft.colors.BLACK
 
-        # Menú lateral
-        menu_lateral = ft.Container(
+        # Barra lateral
+        sidebar = ft.Container(
             content=ft.Column(
                 [
-                    ft.Text("FACEGUARD", size=12, color="#ffffff"),
-                    ft.Container(
-                        content=ft.ElevatedButton(
-                            "Cerrar Sesión",
-                            icon=ft.icons.CLOSE,
-                            color="white",
-                            bgcolor="red",
-                            style=ft.ButtonStyle(
-                                padding=ft.padding.symmetric(horizontal=10, vertical=5),
-                                # Ajuste del padding para hacerlo más pequeño
-                                elevation=5  # Elevación para sombra
-                            ),
-                            on_click=lambda e: print("Sesión cerrada")  # Acción al hacer clic
-                        ),
-                        width=130,  # Ajusta el ancho del botón
-                        height=40,  # Ajusta el alto del botón
-                        border_radius=8,
-                        margin=ft.margin.only(top=500)
-                    )
-
+                    ft.Text("Flet Admin", size=24, weight=ft.FontWeight.BOLD, color=ft.colors.WHITE),
+                    ft.Divider(color=ft.colors.WHITE24),
+                    ft.TextButton("Dashboard", icon=ft.icons.DASHBOARD, on_click=lambda _: print("Dashboard")),
+                    ft.TextButton("Vehicles", icon=ft.icons.DIRECTIONS_CAR, on_click=lambda _: print("Vehicles")),
+                    ft.TextButton("Drivers", icon=ft.icons.PEOPLE, on_click=lambda _: print("Drivers")),
+                    ft.TextButton("Trips", icon=ft.icons.CALENDAR_TODAY, on_click=lambda _: print("Trips")),
+                    ft.TextButton("Packages", icon=ft.icons.INVENTORY, on_click=lambda _: print("Packages")),
+                    ft.TextButton("Maintenance", icon=ft.icons.BUILD, on_click=lambda _: print("Maintenance")),
+                    ft.TextButton("Settings", icon=ft.icons.SETTINGS, on_click=lambda _: print("Settings")),
                 ],
-                alignment=ft.MainAxisAlignment.START,
-                spacing=10
+                spacing=10,
+                expand=True
             ),
-            width=150,
-            bgcolor="#003366",
+            width=200,
+            bgcolor=ft.colors.BLUE_GREY_900,
             padding=20
         )
 
-        # Cuadro de búsqueda alineado en la parte superior al nivel de "FACEGUARD"
-        cuadro_busqueda = ft.Container(
-            content=ft.TextField(
-                label="Filter user",
-                prefix_icon=ft.icons.SEARCH,
-                width=300,
-                height=30,
-                border_radius=ft.border_radius.all(8)
-            ),
-            padding=ft.padding.only(left=20, top=-5)  # Subir el cuadro de búsqueda ajustando el top para alinearlo mejor
-        )
-
-        # Tarjetas de usuario alineadas y con más espacio entre ellas
-        user_cards = ft.Container(
+        # Cabecera (con el padding envuelto en un Container)
+        header = ft.Container(
             content=ft.Row(
                 [
+                    ft.Text("Dashboard", size=24, weight=ft.FontWeight.BOLD, color=ft.colors.WHITE),
+                    ft.Container(width=20),  # Espaciador en lugar de Spacer
                     ft.Container(
-                        content=ft.Column(
-                            [
-                                ft.Text("Name User", weight="bold", color="#ffffff", text_align="center"),
-                                ft.Text("src Image", color="#ffffff", text_align="center"),
-                            ],
-                            alignment=ft.MainAxisAlignment.CENTER,
-                            horizontal_alignment=ft.CrossAxisAlignment.CENTER  # Alineación horizontal
-                        ),
-                        width=250,
-                        height=150,
-                        bgcolor="#003366",
-                        border_radius=8,
-                        padding=10,
-                        shadow=ft.BoxShadow(
-                            spread_radius=1,
-                            blur_radius=8,
-                            color="#000000",
-                            offset=ft.Offset(2, 2)
-                        ),
-                        margin=ft.margin.only(right=20)  # Añadir margen a cada tarjeta para mayor separación entre ellas
-                    ) for _ in range(3)
+                        content=ft.TextField(hint_text="Search...", bgcolor=ft.colors.BLUE_GREY_800, border_radius=ft.border_radius.all(10), text_size=12),
+                        width=200
+                    ),
+                    ft.IconButton(ft.icons.PERSON, icon_color=ft.colors.WHITE),
                 ],
-                alignment=ft.MainAxisAlignment.CENTER,  # Centrando las tarjetas
-                spacing=30  # Espaciado adicional entre tarjetas
+                alignment="center",
             ),
-            padding=ft.padding.only(left=100, top=10)  # Mover las tarjetas hacia la derecha
+            padding=20,
+            bgcolor=ft.colors.BLUE_GREY_800,
         )
 
-        # Tabla de usuarios centrada con columnas y filas distribuidas, expandida hacia abajo y la derecha
-        user_table = ft.Container(
-            content=ft.Column(
+        # Tarjetas de estadísticas
+        stats_cards = ft.Row(
+            [
+                ft.Card(
+                    content=ft.Container(
+                        ft.Column(
+                            [
+                                ft.Text("Total Users", weight=ft.FontWeight.BOLD, size=18, color=ft.colors.WHITE),
+                                ft.Text("All registered users", size=12, color=ft.colors.WHITE54),
+                                ft.Row([ft.Text("1,234", size=32, weight=ft.FontWeight.BOLD, color=ft.colors.WHITE), ft.Icon(ft.icons.PEOPLE, color=ft.colors.CYAN)]),
+                            ],
+                            spacing=5
+                        ),
+                        padding=20,
+                        bgcolor=ft.colors.BLUE_GREY_900,
+                        border_radius=8
+                    ),
+                ),
+                # Repite el código para otras tarjetas como Total Orders, Total Inventory y Revenue
+            ],
+            spacing=10
+        )
+
+        # Tabla de vehículos
+        vehicles_table = ft.DataTable(
+            columns=[
+                ft.DataColumn(ft.Text("Vehicle")),
+                ft.DataColumn(ft.Text("Type")),
+                ft.DataColumn(ft.Text("Status")),
+            ],
+            rows=[
+                ft.DataRow(cells=[ft.DataCell(ft.Text("Van 001")), ft.DataCell(ft.Text("Van")), ft.DataCell(ft.Text("Available"))]),
+                ft.DataRow(cells=[ft.DataCell(ft.Text("Truck 002")), ft.DataCell(ft.Text("Truck")), ft.DataCell(ft.Text("Maintenance"))]),
+                ft.DataRow(cells=[ft.DataCell(ft.Text("Bus 003")), ft.DataCell(ft.Text("Bus")), ft.DataCell(ft.Text("Available"))]),
+                ft.DataRow(cells=[ft.DataCell(ft.Text("Car 004")), ft.DataCell(ft.Text("Car")), ft.DataCell(ft.Text("Rented"))]),
+            ],
+        )
+
+        # Contenedor principal
+        self.page.add(
+            ft.Row(
                 [
-                    # Cabecera de la tabla
-                    ft.Row(
+                    sidebar,
+                    ft.Column(
                         [
-                            ft.Container(
-                                content=ft.Text("Name User", weight="bold", color="white", text_align="center"),
-                                bgcolor="#003366",
-                                alignment=ft.alignment.center,
-                                padding=ft.padding.symmetric(vertical=10),
-                                expand=True
-                            ),
-                            ft.Container(
-                                content=ft.Text("Date register", weight="bold", color="white", text_align="center"),
-                                bgcolor="#003366",
-                                alignment=ft.alignment.center,
-                                padding=ft.padding.symmetric(vertical=10),
-                                expand=True
-                            ),
-                            ft.Container(
-                                content=ft.Text("img user", weight="bold", color="white", text_align="center"),
-                                bgcolor="#003366",
-                                alignment=ft.alignment.center,
-                                padding=ft.padding.symmetric(vertical=10),
-                                expand=True
-                            ),
-                            ft.Container(
-                                width=50  # Columna para el icono de eliminación
-                            )
-                        ]
-                    ),
-                    ft.Divider(height=1, color="grey"),  # Línea divisoria
-
-                    # Filas de la tabla
-                    ft.Row(
-                        [
-                            ft.Text("Cristofer", expand=True, text_align="center", color="black"),
-                            ft.Text("2024-11-07 13:49:08", expand=True, text_align="center", color="black"),
-                            ft.Text("process/database/faces/Cristofer.png", expand=True, text_align="center", color="black"),
-                            ft.IconButton(icon=ft.icons.DELETE, icon_color="red")  # Botón de eliminación
+                            header,
+                            stats_cards,
+                            vehicles_table,
                         ],
-                        alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
-                        spacing=10
-                    ),
-                    ft.Row(
-                        [
-                            ft.Text("Andrey", expand=True, text_align="center", color="black"),
-                            ft.Text("2024-11-07 13:49:08", expand=True, text_align="center", color="black"),
-                            ft.Text("process/database/faces/Andrey.png", expand=True, text_align="center", color="black"),
-                            ft.IconButton(icon=ft.icons.DELETE, icon_color="red")  # Botón de eliminación
-                        ],
-                        alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
-                        spacing=10
-                    ),
-                    ft.Row(
-                        [
-                            ft.Text("Jocsan", expand=True, text_align="center", color="black"),
-                            ft.Text("2024-11-07 13:49:08", expand=True, text_align="center", color="black"),
-                            ft.Text("process/database/faces/Jocsan.png", expand=True, text_align="center", color="black"),
-                            ft.IconButton(icon=ft.icons.DELETE, icon_color="red")  # Botón de eliminación
-                        ],
-                        alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
-                        spacing=10
-                    ),
-                    ft.Row(
-                        [
-                            ft.Text("Enoc", expand=True, text_align="center", color="black"),
-                            ft.Text("2024-11-07 13:49:08", expand=True, text_align="center", color="black"),
-                            ft.Text("process/database/faces/Enoc.png", expand=True, text_align="center", color="black"),
-                            ft.IconButton(icon=ft.icons.DELETE, icon_color="red")  # Botón de eliminación
-                        ],
-                        alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
-                        spacing=10
-                    ),
-                    # Puedes añadir más filas aquí si es necesario
-                ]
-            ),
-            padding=ft.padding.all(20),
-            bgcolor="#ffffff",
-            border_radius=8,
-            shadow=ft.BoxShadow(
-                spread_radius=1,
-                blur_radius=8,
-                color="#000000",
-                offset=ft.Offset(2, 2)
-            ),
-            height=370,  # Ajuste para expandir la tabla hacia abajo
-            width=1070  # Aumenta el ancho para extender la tabla más hacia la derecha
+                        expand=True
+                    )
+                ],
+                expand=True
+            )
         )
-
-        # Contenido principal
-        main_content = ft.Column(
-            [
-                cuadro_busqueda,
-                user_cards,
-                user_table
-            ],
-            spacing=20
-        )
-
-        # Estructura general del dashboard
-        content_row = ft.Row(
-            [
-                menu_lateral,
-                main_content
-            ],
-            spacing=20
-        )
-
-        # Mostrar la vista en la página
-        self.page.controls.clear()
-        self.page.add(content_row)
-        self.page.update()
+        self.page.update()  # Asegúrate de actualizar la página después de los cambios

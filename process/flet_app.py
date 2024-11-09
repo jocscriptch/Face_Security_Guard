@@ -42,7 +42,7 @@ class GraphicalUserInterface:
         # Instanciar vistas
         self.login_view = LoginPage(page, self.images, self.show_register, self.show_login)
         self.register_view = RegisterPage(page, self.images, self.show_init, self.on_register)
-        self.dashboard_view = DashBoardPage(page)
+        self.dashboard_view = DashBoardPage(self.page)
 
         # **Instanciar AlertDialogFactory**
         self.alert_factory = AlertDialogFactory(self.page)
@@ -84,7 +84,7 @@ class GraphicalUserInterface:
     # captura de video en el registro
     def show_register_capture(self, username):
         # Captura de video con OpenCV
-        cap = cv2.VideoCapture(0)
+        cap = cv2.VideoCapture(1)
         cap.set(3, 1280)
         cap.set(4, 720)
         start_time = time.time()
@@ -122,7 +122,7 @@ class GraphicalUserInterface:
     # captura de video en el login
     def show_login_capture(self):
         self.face_login.reset_cont_frame()
-        cap = cv2.VideoCapture(0)
+        cap = cv2.VideoCapture(1)
         cap.set(3, 1280)
         cap.set(4, 720)
 
