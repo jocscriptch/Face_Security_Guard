@@ -4,14 +4,14 @@ import time
 from typing import Tuple
 
 from process.face_processing.face_utils import FaceUtils
-from process.database.config import DataBasePaths
-
+# from process.database.config import DataBasePaths
 from process.gui.image_paths import ImagePaths
+from mongodb.db_functions import insert_user
 
 
 class FaceSignUp:
     def __init__(self, images: ImagePaths):
-        self.database = DataBasePaths()
+        # self.database = DataBasePaths()
         self.face_utils = FaceUtils()
         self.images = images
         self.countdown_start = None
@@ -74,16 +74,6 @@ class FaceSignUp:
             # Detectar parpadeos
             blink_detected = self.face_utils.detect_blink(face_mesh_points_list)
 
-            if blink_detected:
-                self.no_blink_start_time = time.time()
-                self.liveness_error_displayed = False
-            else:
-                if time.time() - self.no_blink_start_time > 10 and not self.liveness_error_displayed:
-                    # Mostrar imagen de error
-                    if self.img_error is not None:
-                        face_image = self.face_utils.overlay_image(face_image, self.img_error, 0, 0)
-                    self.liveness_error_displayed = True
-
             # Dibujar rectángulo alrededor del rostro
             face_bbox = self.face_utils.extract_face_bbox(face_image, face_info)
 
@@ -100,14 +90,11 @@ class FaceSignUp:
                 delay = 2  # Tiempo de espera en segundos
                 time_since_blinks = time.time() - self.save_image_start_time
                 if time_since_blinks >= delay:
-                    # Guardar el rostro
+                    # Guardar el rostro en MongoDB
                     face_crop = self.face_utils.face_crop(face_save, face_bbox)
-                    check_save_image = self.face_utils.save_face(face_crop, user_code, self.database.faces)
-                    if check_save_image:
-                        self.save_image_flag = True
-                        self.success_start_time = time.time()
-                    else:
-                        print("Error al guardar la imagen del rostro.")
+                    insert_user(user_code, face_crop)  # Usar la función insert_user
+                    self.save_image_flag = True
+                    self.success_start_time = time.time()
                 else:
                     # Mostrar cuenta regresiva
                     countdown = int(delay - time_since_blinks) + 1

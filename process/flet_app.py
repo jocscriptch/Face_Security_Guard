@@ -1,9 +1,8 @@
-import os
 import cv2
 import flet as ft
 import time
 
-from process.database.config import DataBasePaths
+# from process.database.config import DataBasePaths
 from process.gui.image_paths import ImagePaths
 from process.gui.fonts_paths import FontPaths, register_fonts
 from process.gui.views.dashboard_page import DashBoardPage
@@ -12,6 +11,7 @@ from process.gui.views.register_page import RegisterPage
 from process.face_processing.face_signup import FaceSignUp
 from process.face_processing.face_login import FaceLogIn
 from process.gui.components.alertdialogs import AlertDialogFactory
+from mongodb.db_functions import insert_user, get_user
 
 
 class GraphicalUserInterface:
@@ -30,7 +30,7 @@ class GraphicalUserInterface:
         # Instanciar ImagePaths y FontPaths
         self.images = ImagePaths()
         self.fonts = FontPaths()
-        self.database = DataBasePaths()
+        # self.database = DataBasePaths()
         self.face_sign_up = FaceSignUp(self.images)
         self.face_login = FaceLogIn(self.images)
         self.user_list = []
@@ -66,27 +66,13 @@ class GraphicalUserInterface:
 
         if len(username) == 0:
             self.alert_factory.show_warning_dialog("¡Información incompleta! Por favor, ingrese un nombre de usuario.")
-            # print("¡Información incompleta! Por favor, ingrese un nombre de usuario.")
             return
 
-        # Ruta del archivo del usuario
-        user_file_path = os.path.join(self.database.users, f"{username}.txt")
-
-        # Verificar si el usuario ya está registrado
-        if os.path.exists(user_file_path):
-            self.alert_factory.show_warning_dialog("¡Usuario ya registrado!")
-            # print(f"¡Usuario '{username}' ya registrado!")
+        # Verificar si el usuario ya está registrado en MongoDB
+        existing_user = get_user(username)
+        if existing_user:
+            self.alert_factory.show_warning_dialog(f"¡Usuario {username} ya registrado!")
             return
-
-        # Guardar usuario en txt por el momento (base de datos)
-        with open(user_file_path, "w") as file:
-            file.write(f"Usuario: {username}")
-        self.alert_factory.show_success_dialog(f"Usuario {username} registrado exitosamente!")
-        # print(f"¡Usuario {username} registrado exitosamente!")
-
-        # Limpiar el campo de texto
-        self.register_view.username_textfield.value = ""
-        self.register_view.username_textfield.update()
 
         # Iniciar la captura de video al registrar
         self.show_register_capture(username)
@@ -98,8 +84,7 @@ class GraphicalUserInterface:
     # captura de video en el registro
     def show_register_capture(self, username):
         # Captura de video con OpenCV
-        cap = cv2.VideoCapture(1)
-        # cap = cv2.VideoCapture("http://192.168.0.5:4747/video")
+        cap = cv2.VideoCapture(0)
         cap.set(3, 1280)
         cap.set(4, 720)
         start_time = time.time()
@@ -108,7 +93,6 @@ class GraphicalUserInterface:
             ret, frame = cap.read()
             if not ret:
                 self.alert_factory.show_error_dialog("Error al acceder a la cámara")
-                # print("Error al acceder a la cámara")
                 break
 
             # Procesar la imagen (registro facial)
@@ -119,9 +103,13 @@ class GraphicalUserInterface:
 
             # Cerrar la ventana luego de 3 segundos desde que se guardó la imagen
             if self.face_sign_up.success_start_time and time.time() - self.face_sign_up.success_start_time >= 3:
+                # Intenta insertar el usuario en MongoDB
+                if save_img:
+                    result = insert_user(username, save_img)
+                    self.alert_factory.show_success_dialog(f"Usuario {username} registrado exitosamente!")
+
                 self.close_window_video_capture()
-                # ir al inicio
-                self.show_init()
+                self.show_init()  # Ir al inicio
                 break
 
             # Salir al presionar la tecla "Esc" (Opcional)
@@ -134,7 +122,7 @@ class GraphicalUserInterface:
     # captura de video en el login
     def show_login_capture(self):
         self.face_login.reset_cont_frame()
-        cap = cv2.VideoCapture(1)
+        cap = cv2.VideoCapture(0)
         cap.set(3, 1280)
         cap.set(4, 720)
 
