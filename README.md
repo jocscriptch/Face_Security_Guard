@@ -15,6 +15,8 @@ Sistema de Seguridad Facial (Face Security Guard) es un proyecto desarrollado en
 
 - **Interfaz Intuitiva:** Interfaz de usuario desarrollada con [Flet](https://flet.dev/) que facilita la interacción y navegación entre las diferentes funcionalidades del sistema.
 
+## 🗄️ Almacenamiento de Datos
+El sistema utiliza [MongoDB Atlas](https://www.mongodb.com/es/atlas) para almacenar de manera segura la información de los usuarios y sus capturas faciales, garantizando escalabilidad, seguridad y rendimiento para el manejo de datos.
 
 ## 💻Requisitos de la Máquina y Sistema Operativo
 
