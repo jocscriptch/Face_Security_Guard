@@ -1,0 +1,1 @@
+facial_scan_image_path: str = 'process/gui/assets/images/facial_scan.jpeg'

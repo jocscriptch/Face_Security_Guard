@@ -1,5 +1,5 @@
 import flet as ft
-
+from process.gui.image_paths import ImagePaths
 
 class DashBoardPage:
     def __init__(self, page: ft.Page):
@@ -7,6 +7,7 @@ class DashBoardPage:
         self.content_shown = False  # Bandera para controlar la visibilidad
         self.home_active = True  # Estado de Home
         self.dashboard_active = False  # Estado de Dashboard
+        self.image_paths = ImagePaths()  # Instancia de ImagePaths para acceder a las rutas de imagen
 
     def show(self):
         self.page.clean()  # Limpia cualquier contenido anterior de la página
@@ -40,9 +41,9 @@ class DashBoardPage:
                 [
                     # Mensaje de bienvenida
                     ft.Text("Bienvenido a Face Security Guard", size=30, weight=ft.FontWeight.BOLD,
-                            color=ft.colors.WHITE),
+                            color=ft.colors.WHITE, text_align=ft.TextAlign.CENTER),
                     ft.Text("El sistema avanzado de seguridad basado en reconocimiento facial.", size=18,
-                            color=ft.colors.WHITE),
+                            color=ft.colors.WHITE, text_align=ft.TextAlign.CENTER),
 
                     # Descripción del Proyecto
                     ft.Divider(color=ft.colors.WHITE24),
@@ -56,9 +57,9 @@ class DashBoardPage:
                     # Imágenes con Títulos
                     ft.Row(
                         [
-                            self.create_image_container("Características", "https://link-a-tu-imagen-1.jpg"),
-                            self.create_image_container("Verificación Facial", "https://link-a-tu-imagen-2.jpg"),
-                            self.create_image_container("Seguridad Avanzada", "https://link-a-tu-imagen-3.jpg"),
+                            self.create_image_container("Características", self.image_paths.init_system_img),
+                            self.create_image_container("Verificación Facial", self.image_paths.facial_register_img),
+                            self.create_image_container("Seguridad Avanzada", self.image_paths.facial_scan_img),
                         ],
                         spacing=20,
                         alignment=ft.MainAxisAlignment.CENTER,
@@ -69,6 +70,7 @@ class DashBoardPage:
                 expand=True
             ),
             padding=20,
+            margin=ft.padding.only(left=40)  # Ajusta el margen izquierdo para mover el texto
         ) if self.home_active else ft.Container()
 
         # Contenedor principal
@@ -89,21 +91,34 @@ class DashBoardPage:
         )
         self.page.update()  # Asegúrate de actualizar la página después de los cambios
 
-    def create_image_container(self, title: str, image_url: str):
+    def create_image_container(self, title: str, image_path: str):
         """ Función para crear un contenedor con imagen y título """
         return ft.Container(
             content=ft.Column(
                 [
-                    ft.Text(title, size=20, weight=ft.FontWeight.BOLD, color=ft.colors.WHITE),
-                    ft.Image(src=image_url, width=250, height=250),  # Tamaño ajustable según necesidad
+                    # Título con ligero padding a la izquierda para moverlo un poco a la derecha
+                    ft.Container(
+                        content=ft.Text(
+                            title,
+                            size=20,
+                            weight=ft.FontWeight.BOLD,
+                            color=ft.colors.WHITE,
+                            text_align=ft.TextAlign.CENTER
+                        ),
+                        padding=ft.padding.only(left=10)  # Ajuste de padding a la izquierda
+                    ),
+                    # Imagen centrada con mayor altura
+                    ft.Image(src=image_path, width=250, height=300, fit=ft.ImageFit.CONTAIN),
+                    # Aumenta la altura de la imagen
                 ],
                 spacing=10,
-                alignment=ft.MainAxisAlignment.CENTER
+                alignment=ft.MainAxisAlignment.CENTER  # Centra el contenido de la columna
             ),
-            width=300,
+            width=300,  # Mantener el ancho original
             padding=10,
             bgcolor=ft.colors.BLUE_GREY_800,
-            border_radius=8
+            border_radius=8,
+            alignment=ft.alignment.center  # Centra el contenedor en la fila
         )
 
     def toggle_dashboard(self, e):
@@ -146,7 +161,7 @@ class DashBoardPage:
             spacing=10
         )
 
-        # Tabla de vehículos (inicialmente oculta)
+        # Agregar tabla de vehículos al Dashboard
         vehicles_table = ft.DataTable(
             columns=[
                 ft.DataColumn(ft.Text("Vehículo")),
@@ -165,9 +180,16 @@ class DashBoardPage:
             ],
         )
 
-        return stats_cards if self.content_shown else ft.Container()
+        return ft.Column(
+            [
+                stats_cards,
+                ft.Divider(color=ft.colors.WHITE24),
+                vehicles_table  # Añadir la tabla aquí
+            ],
+            spacing=20
+        ) if self.content_shown else ft.Container()
 
     def logout(self, e):
         """ Manejar clic en el botón de Cerrar Sesión """
-        self.page.add(ft.Text("Sesión cerrada."))
+        print("Cerrando sesión...")
         self.page.update()  # Actualizar la página después de cerrar sesión

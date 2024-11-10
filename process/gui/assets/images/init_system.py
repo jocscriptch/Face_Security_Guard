@@ -1,0 +1,1 @@
+init_system_image_path: str = 'process/gui/assets/images/init_system.png'

@@ -1,0 +1,1 @@
+facial_register_image_path: str = 'process/gui/assets/images/facial_register.png'
