@@ -76,6 +76,9 @@ Ventana de Inicio del Sistema
 Ventana de Registro Facial
 ![flet_YQRuVho4Sr](https://github.com/user-attachments/assets/f5a2918a-44f6-46e8-848c-571fc4eb517a)
 
+Ventana del Dashboard Administrativo
+![image](https://github.com/user-attachments/assets/09a824a0-0a17-49ba-b23f-011e6a9688bf)
+
 **Nota:** Las otras ventanas son en tiempo real utilizando la libreria de OpenCV
 
 ## Desarrolladores
