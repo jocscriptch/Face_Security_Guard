@@ -8,6 +8,9 @@ from process.gui.assets.images.sucess_liveness import sucess_liveness_image_path
 from process.gui.assets.images.check import check_image_path
 from process.gui.assets.images.see_cam import see_cam_image_path
 from process.gui.assets.images.blinkings import blinkings_image_path
+from process.gui.assets.images.init_system import init_system_image_path
+from process.gui.assets.images.facial_register import facial_register_image_path
+from process.gui.assets.images.facial_scan import facial_scan_image_path
 
 
 class ImagePaths(BaseModel):
@@ -34,3 +37,12 @@ class ImagePaths(BaseModel):
 
     # blinkings
     blinkings_img: str = blinkings_image_path
+
+    # init_system
+    init_system_img: str = init_system_image_path
+
+    # facial_register
+    facial_register_img: str = facial_register_image_path
+
+    # facial_scan
+    facial_scan_img: str = facial_scan_image_path
