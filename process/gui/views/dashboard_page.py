@@ -104,52 +104,84 @@ class DashBoardPage:
             alignment=ft.alignment.center
         )
 
-    def generate_bar_chart(self):
-        # Obtener la lista de usuarios
+    def generate_line_chart(self):
+        # Obtener la lista de usuarios y sus conexiones
         users = db.users.find()
-
-        # Inicializar las listas para los nombres de usuarios y las conexiones (accesos)
         user_names = []
         connections = []
 
-        # Recorrer los usuarios y obtener la cantidad de accesos
         for user in users:
-            user_names.append(user["username"])  # Añadir el nombre de usuario
-            connections.append(len(user["access_logs"]))  # Contar los registros de acceso
+            user_names.append(user["username"])
+            connections.append(len(user["access_logs"]))
 
-        # Colores para las barras
-        colors = [ft.colors.BLUE, ft.colors.DEEP_PURPLE, ft.colors.BLUE] * (len(user_names) // 3 + 1)
+        # Crear puntos de datos y series de ejemplo
+        data_series = [
+            ft.LineChartData(
+                data_points=[ft.LineChartDataPoint(x=i, y=connections[i]) for i in range(len(user_names))],
+                stroke_width=6,
+                color=ft.colors.CYAN,
+                curved=True,
+                stroke_cap_round=True,
+                below_line_bgcolor=ft.colors.with_opacity(0.1, ft.colors.CYAN)
+            ),
+            ft.LineChartData(
+                data_points=[ft.LineChartDataPoint(x=i, y=connections[i] * 0.8) for i in range(len(user_names))],
+                stroke_width=6,
+                color=ft.colors.PINK,
+                curved=True,
+                stroke_cap_round=True,
+                below_line_bgcolor=ft.colors.with_opacity(0.1, ft.colors.PINK)
+            ),
+            ft.LineChartData(
+                data_points=[ft.LineChartDataPoint(x=i, y=connections[i] * 0.5) for i in range(len(user_names))],
+                stroke_width=6,
+                color=ft.colors.LIGHT_GREEN,
+                curved=True,
+                stroke_cap_round=True,
+                below_line_bgcolor=ft.colors.with_opacity(0.1, ft.colors.LIGHT_GREEN)
+            ),
+        ]
 
-        # Crear el gráfico de barras
-        chart = ft.BarChart(
-            bar_groups=[
-                ft.BarChartGroup(
-                    x=i,
-                    bar_rods=[
-                        ft.BarChartRod(
-                            from_y=0,
-                            to_y=connections[i],
-                            width=30,
-                            color=colors[i % len(colors)],
-                            tooltip=f"{user_names[i]}: {connections[i]} conexiones"
-                        ),
-                    ],
-                ) for i in range(len(user_names))
-            ],
-            border=ft.border.all(1, ft.colors.GREY_400),
-            left_axis=ft.ChartAxis(labels_size=10, title=ft.Text("Usuarios Conectados")),
+        # Configurar el gráfico de líneas
+        chart = ft.LineChart(
+            data_series=data_series,
+            border=ft.Border(
+                bottom=ft.BorderSide(2, ft.colors.GREY_600)
+            ),
+            left_axis=ft.ChartAxis(
+                #title_size=12,
+                labels=[
+                    ft.ChartAxisLabel(value=i, label=ft.Text(f"{i}", color=ft.colors.GREY_400, rotate=0))
+                    # Alineación horizontal
+                    for i in range(0, max(connections) + 5, 5)
+                ],
+                labels_size=5,
+                title=ft.Text("Conexiones", color=ft.colors.GREY_400)
+            ),
             bottom_axis=ft.ChartAxis(
                 labels=[
-                    ft.ChartAxisLabel(value=i, label=ft.Text(user_names[i]))
+                    ft.ChartAxisLabel(value=i, label=ft.Text(user_names[i], color=ft.colors.GREY_400))
                     for i in range(len(user_names))
                 ],
+                labels_size=24,  # Ajustar el tamaño de las etiquetas en el eje X
             ),
-            horizontal_grid_lines=ft.ChartGridLines(color=ft.colors.GREY_300, width=1, dash_pattern=[3, 3]),
+            horizontal_grid_lines=ft.ChartGridLines(color=ft.colors.GREY_800, width=0.5, dash_pattern=[3, 3]),
+            vertical_grid_lines=ft.ChartGridLines(color=ft.colors.GREY_800, width=0.5, dash_pattern=[3, 3]),
             max_y=max(connections) + 5,
+            min_y=0,
             expand=True,
+            tooltip_bgcolor=ft.colors.with_opacity(0.8, ft.colors.BLUE_GREY),
+            width=650,
+            height=350
         )
 
-        return chart
+        # Envolver el gráfico en un Container para aplicar el margen
+        chart_container = ft.Container(
+            content=chart,
+            margin=ft.margin.only(left=10, bottom=60, right=10)
+        )
+
+        return chart_container
 
     def show_dashboard(self):
         # Obtener el total de usuarios
@@ -220,12 +252,11 @@ class DashBoardPage:
             rows=rows,
         )
 
-        bar_chart = self.generate_bar_chart()
-
+        line_chart = self.generate_line_chart()
         content = ft.Row(
             [
                 ft.Container(content=users_table, expand=1),
-                ft.Container(content=bar_chart, expand=1, margin=ft.margin.only(left=10)),
+                ft.Container(content=line_chart, expand=1, margin=ft.margin.only(left=10)),
             ],
             spacing=20
         )
