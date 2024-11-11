@@ -42,7 +42,7 @@ class GraphicalUserInterface:
         # Instanciar vistas
         self.login_view = LoginPage(page, self.images, self.show_register, self.show_login)
         self.register_view = RegisterPage(page, self.images, self.show_init, self.on_register)
-        self.dashboard_view = DashBoardPage(self.page)
+        self.dashboard_view = DashBoardPage(self.page, self)
 
         # **Instanciar AlertDialogFactory**
         self.alert_factory = AlertDialogFactory(self.page)

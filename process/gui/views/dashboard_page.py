@@ -5,8 +5,9 @@ from mongodb.db_functions import get_total_users, db, fs, is_user_active
 from process.gui.image_paths import ImagePaths
 
 class DashBoardPage:
-    def __init__(self, page: ft.Page):
+    def __init__(self, page: ft.Page, app):
         self.page = page
+        self.app = app
         self.content_shown = False
         self.home_active = True
         self.dashboard_active = False
@@ -268,5 +269,6 @@ class DashBoardPage:
 
     def logout(self, e):
         print("Cerrando sesión...")
-        self.page.update()
+        self.app.show_init()
+
 
