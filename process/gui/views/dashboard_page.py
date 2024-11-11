@@ -1,4 +1,7 @@
 import flet as ft
+from bson import ObjectId
+
+from mongodb.db_functions import get_total_users, db, fs, is_user_active
 from process.gui.image_paths import ImagePaths
 
 class DashBoardPage:
@@ -11,16 +14,16 @@ class DashBoardPage:
 
     def show(self):
         self.page.clean()
-        self.page.title = "Flet Admin Dashboard"
+        self.page.title = "Admin Dashboard"
         self.page.theme_mode = "dark"
         self.page.padding = 0
-        self.page.bgcolor = ft.colors.BLACK
+        self.page.bgcolor = '#13161c'
 
         # Barra lateral
         sidebar = ft.Container(
             content=ft.Column(
                 [
-                    ft.Text("Flet Admin", size=24, weight=ft.FontWeight.BOLD, color=ft.colors.WHITE),
+                    ft.Text("FልCE𝒢UARD", size=24, weight=ft.FontWeight.BOLD, color=ft.colors.WHITE),
                     ft.Divider(color=ft.colors.WHITE24),
                     ft.TextButton("Home", icon=ft.icons.HOME, on_click=self.navigate_home),
                     ft.TextButton("Dashboard", icon=ft.icons.DASHBOARD, on_click=self.toggle_dashboard),
@@ -31,7 +34,7 @@ class DashBoardPage:
                 expand=True
             ),
             width=200,
-            bgcolor=ft.colors.BLUE_GREY_900,
+            bgcolor='#191C24',
             padding=20
         )
 
@@ -50,9 +53,9 @@ class DashBoardPage:
                     ft.Divider(color=ft.colors.WHITE24),
                     ft.Row(
                         [
-                            self.create_image_container("Características", self.image_paths.init_system_img),
-                            self.create_image_container("Verificación Facial", self.image_paths.facial_register_img),
-                            self.create_image_container("Seguridad Avanzada", self.image_paths.facial_scan_img),
+                            self.create_image_container("Inicio de App", self.image_paths.init_system_img),
+                            self.create_image_container("Registro Facial", self.image_paths.facial_register_img),
+                            self.create_image_container("Escaneo Facial", self.image_paths.facial_scan_img),
                         ],
                         spacing=20,
                         alignment=ft.MainAxisAlignment.CENTER,
@@ -96,16 +99,28 @@ class DashBoardPage:
             ),
             width=300,
             padding=10,
-            bgcolor=ft.colors.BLUE_GREY_800,
+            bgcolor='#191C24',
             border_radius=8,
             alignment=ft.alignment.center
         )
 
     def generate_bar_chart(self):
-        users = ["AndreyBV", "Cristofer", "Jocsan"]
-        connections = [12, 8, 15]
-        colors = [ft.colors.BLUE, ft.colors.DEEP_PURPLE, ft.colors.BLUE]
+        # Obtener la lista de usuarios
+        users = db.users.find()
 
+        # Inicializar las listas para los nombres de usuarios y las conexiones (accesos)
+        user_names = []
+        connections = []
+
+        # Recorrer los usuarios y obtener la cantidad de accesos
+        for user in users:
+            user_names.append(user["username"])  # Añadir el nombre de usuario
+            connections.append(len(user["access_logs"]))  # Contar los registros de acceso
+
+        # Colores para las barras
+        colors = [ft.colors.BLUE, ft.colors.DEEP_PURPLE, ft.colors.BLUE] * (len(user_names) // 3 + 1)
+
+        # Crear el gráfico de barras
         chart = ft.BarChart(
             bar_groups=[
                 ft.BarChartGroup(
@@ -116,26 +131,30 @@ class DashBoardPage:
                             to_y=connections[i],
                             width=30,
                             color=colors[i % len(colors)],
-                            tooltip=f"{users[i]}: {connections[i]} conexiones"
+                            tooltip=f"{user_names[i]}: {connections[i]} conexiones"
                         ),
                     ],
-                ) for i in range(len(users))
+                ) for i in range(len(user_names))
             ],
             border=ft.border.all(1, ft.colors.GREY_400),
             left_axis=ft.ChartAxis(labels_size=10, title=ft.Text("Usuarios Conectados")),
             bottom_axis=ft.ChartAxis(
                 labels=[
-                    ft.ChartAxisLabel(value=i, label=ft.Text(users[i]))
-                    for i in range(len(users))
+                    ft.ChartAxisLabel(value=i, label=ft.Text(user_names[i]))
+                    for i in range(len(user_names))
                 ],
             ),
             horizontal_grid_lines=ft.ChartGridLines(color=ft.colors.GREY_300, width=1, dash_pattern=[3, 3]),
             max_y=max(connections) + 5,
             expand=True,
         )
+
         return chart
 
     def show_dashboard(self):
+        # Obtener el total de usuarios
+        total_users = get_total_users()  # Llamamos a la función que obtiene el total de usuarios
+
         stats_cards = ft.Row(
             [
                 ft.Card(
@@ -144,38 +163,68 @@ class DashBoardPage:
                             [
                                 ft.Text("Total Usuarios", weight=ft.FontWeight.BOLD, size=18, color=ft.colors.WHITE),
                                 ft.Text("Todos los usuarios registrados", size=12, color=ft.colors.WHITE54),
-                                ft.Row([ft.Text("1,234", size=32, weight=ft.FontWeight.BOLD, color=ft.colors.WHITE), ft.Icon(ft.icons.PEOPLE, color=ft.colors.CYAN)]),
+                                ft.Row([ft.Text(str(total_users), size=32, weight=ft.FontWeight.BOLD,
+                                                color=ft.colors.WHITE),
+                                        ft.Icon(ft.icons.PEOPLE, color=ft.colors.CYAN)]),
                             ],
                             spacing=5
                         ),
                         padding=20,
-                        bgcolor=ft.colors.BLUE_GREY_900,
-                        border_radius=8
+                        bgcolor='#1E1E2F',
+                        border_radius=12,
                     ),
+                    elevation=6,
                 ),
             ],
             spacing=10
         )
 
-        vehicles_table = ft.DataTable(
+        # Obtener la lista de usuarios
+        users = db.users.find()
+        rows = []
+
+        for user in users:
+            username = user.get("username", "")
+            image_id = user.get("image_id", "")
+            image_name = fs.get(ObjectId(image_id)).filename if image_id else "Desconocida"
+            status = is_user_active(username)
+
+            rows.append(
+                ft.DataRow(
+                    cells=[
+                        ft.DataCell(ft.Text(username, color=ft.colors.WHITE)),
+                        ft.DataCell(ft.Text(image_name, color=ft.colors.WHITE)),
+                        ft.DataCell(ft.Text(status, color=ft.colors.CYAN if status == "Activo" else ft.colors.RED)),
+                    ]
+                )
+            )
+
+        # Crear la tabla de usuarios con un estilo moderno y simplificado
+        users_table = ft.DataTable(
+            bgcolor="#2A2D3E",  # Fondo de la tabla
+            border_radius=10,  # Bordes redondeados para suavidad
+            heading_row_color=ft.colors.BLACK12,  # Color de fondo del encabezado
+            data_row_color={ft.ControlState.HOVERED: "0x30FFFFFF"},  # Color al pasar el cursor
+            column_spacing=50,  # Espaciado entre columnas
             columns=[
-                ft.DataColumn(ft.Text("Vehículo")),
-                ft.DataColumn(ft.Text("Tipo")),
-                ft.DataColumn(ft.Text("Estado")),
+                ft.DataColumn(
+                    ft.Text("Nombre de Usuario", color=ft.colors.WHITE, size=16, weight=ft.FontWeight.BOLD)
+                ),
+                ft.DataColumn(
+                    ft.Text("Imagen", color=ft.colors.WHITE, size=16, weight=ft.FontWeight.BOLD)
+                ),
+                ft.DataColumn(
+                    ft.Text("Estado", color=ft.colors.WHITE, size=16, weight=ft.FontWeight.BOLD)
+                ),
             ],
-            rows=[
-                ft.DataRow(cells=[ft.DataCell(ft.Text("Van 001")), ft.DataCell(ft.Text("Van")), ft.DataCell(ft.Text("Disponible"))]),
-                ft.DataRow(cells=[ft.DataCell(ft.Text("Truck 002")), ft.DataCell(ft.Text("Camión")), ft.DataCell(ft.Text("Mantenimiento"))]),
-                ft.DataRow(cells=[ft.DataCell(ft.Text("Bus 003")), ft.DataCell(ft.Text("Autobús")), ft.DataCell(ft.Text("Disponible"))]),
-                ft.DataRow(cells=[ft.DataCell(ft.Text("Car 004")), ft.DataCell(ft.Text("Coche")), ft.DataCell(ft.Text("Alquilado"))]),
-            ],
+            rows=rows,
         )
 
         bar_chart = self.generate_bar_chart()
 
         content = ft.Row(
             [
-                ft.Container(content=vehicles_table, expand=1),
+                ft.Container(content=users_table, expand=1),
                 ft.Container(content=bar_chart, expand=1, margin=ft.margin.only(left=10)),
             ],
             spacing=20
@@ -207,3 +256,4 @@ class DashBoardPage:
     def logout(self, e):
         print("Cerrando sesión...")
         self.page.update()
+

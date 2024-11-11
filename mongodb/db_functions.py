@@ -2,7 +2,7 @@ from bson import ObjectId
 import gridfs
 from mongodb.db_connection import get_database
 
-from datetime import datetime
+from datetime import datetime, timedelta
 import cv2
 import numpy as np
 
@@ -59,3 +59,22 @@ def get_image_by_id(image_id):
     image_array = np.frombuffer(image_binary, np.uint8)
     image = cv2.imdecode(image_array, cv2.IMREAD_COLOR)
     return image
+
+def get_total_users():
+    """Obtiene el total de usuarios registrados en la base de datos."""
+    total_users = db.users.count_documents({})
+    return total_users
+
+def is_user_active(username):
+    """Verifica si un usuario está activo basándose en los registros de acceso."""
+    user = db.users.find_one({"username": username})
+    if user and user.get("access_logs"):
+        # Suponemos que el usuario está activo si su último acceso fue en las últimas 5 minutos.
+        last_access_time = user["access_logs"][-1]  # Tomamos el último registro de acceso
+        last_access_time = datetime.strptime(last_access_time, "%Y-%m-%d %H:%M:%S")
+        now = datetime.now()
+
+        # Si el último acceso fue en los últimos 5 minutos, lo consideramos activo
+        if now - last_access_time <= timedelta(minutes=5):
+            return "Activo"
+    return "Inactivo"
