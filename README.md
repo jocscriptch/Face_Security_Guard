@@ -1,13 +1,11 @@
 
 # Sistema de Seguridad Facial 🤖
 
-Sistema de Seguridad Facial (Face Security Guard) es un proyecto desarrollado en Python que ofrece funcionalidades avanzadas de reconocimiento y verificación facial. El sistema permite realizar un  registro facial de usuarios y posteriormente realizar una inicio de sesión facial para autenticar la identidad del usuario, garantizando que quien inicia sesión es una persona real y no una fotografía o un robot.
-
-
+Sistema de Seguridad Facial (Face Security Guard) es un proyecto desarrollado en Python que ofrece funcionalidades avanzadas de reconocimiento y verificación facial. El sistema permite realizar un  registro facial de usuarios y posteriormente realizar un inicio de sesión facial para autenticar la identidad del usuario, garantizando que quien inicia sesión es una persona real y no una fotografía o un robot.
 
 ## 🕹️Funcionalidades del Sistema
 
-- **Registro Facial:** Permite registrarse a los usuarios en el sistema mediante el proceso de una  captura facial.
+- **Registro Facial:** Permite el registro de usuarios en el sistema mediante el proceso de una captura facial.
 
 - **Login Facial:** Autentica a los usuarios a través del reconocimiento facial, asegurando que la persona que intenta iniciar sesión es quien dice ser.
 
@@ -68,7 +66,7 @@ Asegúrate de que pip esté actualizado y luego instala las dependencias listada
 
 Dentro de PyCharm puedes ejecutar el proyecto de la siguiente forma:
 
-```python examples/main.py```
+```python app/main.py```
 ## Screenshots
 Ventana de Inicio del Sistema
 ![flet_UKZzXPGVuk](https://github.com/user-attachments/assets/21a3baef-6d8d-4d82-94f7-e820d4773d90)
