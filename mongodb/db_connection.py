@@ -3,7 +3,7 @@ from pymongo.server_api import ServerApi
 import os
 from dotenv import load_dotenv
 
-# Cargar las variables de entorno desde el archivo .env
+# Cargar el archivo .env
 load_dotenv()
 
 # Obtener la URI desde la variable de entorno
@@ -11,7 +11,7 @@ uri = os.getenv("MONGODB_URI")
 
 
 def get_database(db_name):
-    """Devuelve una conexión a la base de datos especificada."""
+    # Devuelve la conexion de la base de datos
     client = MongoClient(uri, server_api=ServerApi('1'))
     try:
         client.admin.command('ping')

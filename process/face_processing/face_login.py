@@ -1,19 +1,16 @@
 import cv2
 import numpy as np
 import time
-from typing import Tuple
 
+from typing import Tuple
 from process.face_processing.face_utils import FaceUtils
-# from process.database.config import DataBasePaths
 from process.gui.image_paths import ImagePaths
 
 
 class FaceLogIn:
     def __init__(self, images: ImagePaths):
-        # self.database = DataBasePaths()
         self.face_utils = FaceUtils()
         self.images = images
-
         self.matcher = None
         self.user_name = None
         self.comparison = False
@@ -35,18 +32,18 @@ class FaceLogIn:
         self.comparison = False
         self.login_success_start_time = None
 
-    def process(self, face_image: np.ndarray) -> Tuple[np.ndarray, bool, str]:
+    def process(self, face_image: np.ndarray) -> Tuple[np.ndarray, bool, str, str]:
         # 1- Detección de rostro
         check_face_detect, face_info, face_save = self.face_utils.check_face(face_image)
         if not check_face_detect:
             self.face_utils.blink_counter = 0
-            return face_image, False, "No se detectó ningún rostro!"
+            return face_image, False, "No se detectó ningún rostro!", ""
 
         # 2- Malla facial
         check_face_mesh, face_mesh_info = self.face_utils.face_mesh(face_image)
         if not check_face_mesh:
             self.face_utils.blink_counter = 0
-            return face_image, False, "No se detectó la malla facial!"
+            return face_image, False, "No se detectó la malla facial!", ""
 
         # 3- Extraer puntos de la malla facial
         face_mesh_points_list = self.face_utils.extract_face_mesh(face_image, face_mesh_info)
@@ -97,14 +94,14 @@ class FaceLogIn:
                 # Si no hay rostros guardados
                 if len(faces_database) == 0:
                     self.face_utils.show_state_login(face_image, False)
-                    return face_image, False, "No hay rostros registrados!"
+                    return face_image, False, "No hay rostros registrados!", ""
 
                 # Recortar el rostro capturado de la imagen actual
                 face_crop = self.face_utils.face_crop(face_save, face_bbox)
 
                 if face_crop is None:
                     self.face_utils.show_state_login(face_image, False)
-                    return face_image, False, "No se pudo capturar el rostro."
+                    return face_image, False, "No se pudo capturar el rostro", ""
 
                 # Comparar rostros usando el método de comparación definido en FaceUtils
                 self.matcher, self.user_name = self.face_utils.face_matching_with_antispoofing(face_crop,
@@ -120,7 +117,7 @@ class FaceLogIn:
                     if self.img_error is not None:
                         face_image = self.face_utils.overlay_image(face_image, self.img_error, 0, 0)
                     self.face_utils.show_state_login(face_image, False)
-                    return face_image, False, "Acceso denegado"
+                    return face_image, False, "Acceso denegado", ""
         else:
             # Si el rostro no está centrado, reiniciar el contador
             self.face_utils.blink_counter = 0
@@ -129,6 +126,6 @@ class FaceLogIn:
 
         # Verificar si han pasado 3 segundos desde que se logró el acceso
         if self.login_success_start_time and (time.time() - self.login_success_start_time >= 2):
-            return face_image, True, "Acceso concedido"
+            return face_image, True, "Acceso concedido", self.user_name
 
-        return face_image, False, "Procesando"
+        return face_image, False, "Procesando", ""

@@ -4,7 +4,6 @@ from deepface import DeepFace
 from typing import Tuple
 import cv2
 import numpy as np
-import json
 
 
 class FaceMatcherModels:

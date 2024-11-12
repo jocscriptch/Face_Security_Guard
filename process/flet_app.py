@@ -2,7 +2,6 @@ import cv2
 import flet as ft
 import time
 
-# from process.database.config import DataBasePaths
 from process.gui.image_paths import ImagePaths
 from process.gui.fonts_paths import FontPaths, register_fonts
 from process.gui.views.dashboard_page import DashBoardPage
@@ -30,7 +29,7 @@ class GraphicalUserInterface:
         # Instanciar ImagePaths y FontPaths
         self.images = ImagePaths()
         self.fonts = FontPaths()
-        # self.database = DataBasePaths()
+
         self.face_sign_up = FaceSignUp(self.images)
         self.face_login = FaceLogIn(self.images)
         self.user_list = []
@@ -112,7 +111,6 @@ class GraphicalUserInterface:
                 self.show_init()  # Ir al inicio
                 break
 
-            # Salir al presionar la tecla "Esc" (Opcional)
             if cv2.waitKey(1) & 0xFF == 27:
                 break
 
@@ -136,13 +134,12 @@ class GraphicalUserInterface:
                 break
 
             # procesar la imagen (iniciar sesión facial)
-            frame, self.user_access, info = self.face_login.process(frame)
+            frame, self.user_access, info, username = self.face_login.process(frame)
             cv2.imshow('Inicio Sesion Facial', frame)
 
             # Si el usuario tiene acceso, mostrar el dashboard
             if self.user_access:
-                self.alert_factory.show_success_dialog(f"¡Inicio de sesión exitoso!")
-                # print("¡Inicio de sesión exitoso, ir al dashboard!")
+                self.alert_factory.show_success_dialog(f"¡Bienvenido {username} 🤖!")
                 self.dashboard_view.show()
 
             if self.user_access and time.time() - start_time >= 2:

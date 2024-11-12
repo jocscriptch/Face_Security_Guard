@@ -147,15 +147,6 @@ class FaceUtils:
 
         return face_image[y1:yf, x1:xf]
 
-    # guardar rostro (revisar si funcina)
-    """def save_face(self, face_crop: np.ndarray, user_code: str, path: str):
-        if len(face_crop) != 0:
-            cv2.imwrite(f"{path}/{user_code}.png", face_crop)
-            return True
-
-        else:
-            return False"""
-
     # maneja estado del registro facial
     def show_state_sign_up(self, face_image: np.ndarray, state: bool, countdown_time: int):
         if state:
@@ -204,24 +195,6 @@ class FaceUtils:
         cv2.rectangle(face_image, (370, 650 - dim[1] - baseline), (370 + dim[0], 650 + baseline), (0, 0, 0), cv2.FILLED)
         cv2.putText(face_image, text, (370, 650 - 5), cv2.FONT_HERSHEY_DUPLEX, 0.75, color, 1)
         self.face_mesh_detector.config_color(color)
-
-    # leer base de datos
-    """
-    def read_face_database(self, database_path: str) -> Tuple[List[np.ndarray], List[str], str]:
-        self.face_db: List[np.ndarray] = []
-        self.face_names: List[str] = []
-
-        for file in os.listdir(database_path):
-            if file.lower().endswith(('.png', '.jpg', '.jpeg')):
-                img_path = os.path.join(database_path, file)
-                img_read = cv2.imread(img_path)
-                if img_read is not None:
-                    self.face_db.append(img_read)
-                    self.face_names.append(os.path.splitext(file)[0])
-                else:
-                    print(f"Error al cargar la imagen: {img_path}")
-        return self.face_db, self.face_names, f'Comparando {len(self.face_db)} rostros!'
-    """
 
     # Leer la base de datos de MongoDB y cargar las imágenes de los usuarios
     def read_face_database(self):
@@ -288,17 +261,6 @@ class FaceUtils:
                 print(f"Error en la comparación con {name_db[idx]}: {e}")
                 continue
         return False, 'Rostro Desconocido!'
-
-    # registrar usuario y guardar fecha y hora
-    """def user_check_in(self, user_name: str, user_path: str):
-        if not self.user_registered:
-            now = datetime.datetime.now()
-            date_time = now.strftime("%Y-%m-%d %H:%M:%S")
-            user_file_path = os.path.join(user_path, f"{user_name}.txt")
-            with open(user_file_path, "a") as user_file:
-                user_file.write(f'\nAcesso autorizado: {date_time}\n')
-
-            self.user_registered = True"""
 
     # registrar usuario y guardar fecha y hora en MongoDB
     def user_check_in(self, user_name: str):

@@ -1,10 +1,9 @@
 import cv2
 import numpy as np
 import time
-from typing import Tuple
 
+from typing import Tuple
 from process.face_processing.face_utils import FaceUtils
-# from process.database.config import DataBasePaths
 from process.gui.image_paths import ImagePaths
 from mongodb.db_functions import insert_user
 

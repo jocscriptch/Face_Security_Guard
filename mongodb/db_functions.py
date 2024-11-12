@@ -43,6 +43,7 @@ def add_access_log(username):
     )
     print(f"Registro de acceso añadido para el usuario: {username}")
 
+
 def get_user(username):
     """Obtiene los datos de un usuario especificado."""
     user = db.users.find_one({"username": username})
@@ -52,6 +53,7 @@ def get_user(username):
         print("Usuario no encontrado.")
     return user
 
+
 def get_image_by_id(image_id):
     """Obtiene la imagen de un usuario usando su ID de imagen."""
     image_binary = fs.get(ObjectId(image_id)).read()
@@ -60,10 +62,12 @@ def get_image_by_id(image_id):
     image = cv2.imdecode(image_array, cv2.IMREAD_COLOR)
     return image
 
+
 def get_total_users():
     """Obtiene el total de usuarios registrados en la base de datos."""
     total_users = db.users.count_documents({})
     return total_users
+
 
 def is_user_active(username):
     """Verifica si un usuario está activo basándose en los registros de acceso."""

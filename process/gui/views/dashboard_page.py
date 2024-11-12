@@ -4,6 +4,7 @@ from bson import ObjectId
 from mongodb.db_functions import get_total_users, db, fs, is_user_active
 from process.gui.image_paths import ImagePaths
 
+
 class DashBoardPage:
     def __init__(self, page: ft.Page, app):
         self.page = page
@@ -92,7 +93,8 @@ class DashBoardPage:
         return ft.Container(
             content=ft.Column(
                 [
-                    ft.Text(title, size=20, weight=ft.FontWeight.BOLD, color=ft.colors.WHITE, text_align=ft.TextAlign.CENTER),
+                    ft.Text(title, size=20, weight=ft.FontWeight.BOLD, color=ft.colors.WHITE,
+                            text_align=ft.TextAlign.CENTER),
                     ft.Image(src=image_path, width=250, height=300, fit=ft.ImageFit.CONTAIN)
                 ],
                 spacing=10,
@@ -270,5 +272,3 @@ class DashBoardPage:
     def logout(self, e):
         print("Cerrando sesión...")
         self.app.show_init()
-
-

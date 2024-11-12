@@ -14,5 +14,5 @@ def main(page: ft.Page):
     app = GraphicalUserInterface(page)
 
 
-# Ejecutar la aplicación Flet desde este archivo
+# Ejecutar la aplicación Flet
 ft.app(target=main, assets_dir="../process/gui/assets")
