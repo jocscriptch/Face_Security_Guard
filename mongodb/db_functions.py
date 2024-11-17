@@ -78,7 +78,7 @@ def is_user_active(username):
         last_access_time = datetime.strptime(last_access_time, "%Y-%m-%d %H:%M:%S")
         now = datetime.now()
 
-        # Si el último acceso fue en los últimos 5 minutos, lo consideramos activo
-        if now - last_access_time <= timedelta(minutes=5):
+        # Si el último acceso fue en los últimos 20 minutos, lo consideramos activo
+        if now - last_access_time <= timedelta(minutes=20):
             return "Activo"
     return "Inactivo"
